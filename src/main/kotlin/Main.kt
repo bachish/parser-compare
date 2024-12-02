@@ -1,4 +1,5 @@
 import java.io.File
+
 // 10 штук руками посмотреть которые никто не распарсил
 // отфильтровать торлько те которые один рапарсил и достать от туда сообщения об ошибках
 // те которые никто не распарсил прогнать чеерез жвм (через питон легко)
@@ -19,24 +20,24 @@ fun main() {
 
 
 
-/////////////////////  Парсим один файл
-//    val filePath = "$directoryPath\\1981175_88001536"
+///////////////////////  Парсим один файл
+//    val filePath = "$directoryPath\\3142580_110474263"
 //    val file = File(filePath)
 //    val (tree, parser) = analyzer.parseFileWithParser(file)
 //    val score = analyzer.calculateSimilarity(file)
 //    println("score: $score")
 //    showParseTree(parser, tree)
 //
-
+//
+//
 
 ////////////////////////    Парсим строчку
-////    val javaCode = "import ".trimIndent()
+////    val javaCode = "public class ProductTester;".trimIndent()
 //    val javaCode = """
 //        public class Main {
 //          public static void main(String[] args)
 //          {
-//            new Person() = Person paul;
-////            Person()
+//            do {}
 //          }
 //        }
 //    """.trimIndent()
@@ -44,6 +45,8 @@ fun main() {
 //    val score = analyzer.calculateSimilarity(javaCode)
 //
 //    println("score: $score")
+//    println(parserFromString.numberOfSyntaxErrors)
+////    println(parserFromString)
 //    showParseTree(parserFromString, treeFromString)
 
 }

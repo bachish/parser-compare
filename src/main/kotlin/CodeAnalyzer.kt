@@ -1,4 +1,5 @@
 import antlr.java.JavaLexer
+import antlr.java.JavaParserBaseVisitor
 import me.tongfei.progressbar.ProgressBar
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.tree.ErrorNode
@@ -18,25 +19,43 @@ import kotlin.math.min
 
 // Универсальный класс для анализа исходного кода
 class CodeAnalyzer(private val language: String) {
-
+    var numberOfSyntaxErrors: Int? = null
     fun calculateSimilarity(file: File): Double {
         val code = Files.readString(Paths.get(file.absolutePath))
         return calculateSimilarity(code)
     }
-
-    fun calculateSimilarity(code: String): Double {
+    // Общая функция для создания лексера
+    private fun createLexer(code: String): Lexer {
         val lexer = ParserFactory.createLexer(language, code)
         lexer.removeErrorListeners()
+        return lexer
+    }
 
-        val tokenStream = CommonTokenStream(lexer)
+    // Общая функция для создания парсера
+    private fun createParser(tokenStream: CommonTokenStream): Parser {
         val parser = ParserFactory.createParser(language, tokenStream)
         parser.removeErrorListeners()
+        return parser
+    }
+
+    // Общая функция для создания дерева разбора
+    private fun createParseTree(code: String): ParseTree {
+        val lexer = createLexer(code)
+        val tokenStream = CommonTokenStream(lexer)
+        val parser = createParser(tokenStream)
+        return ParserFactory.createParseTree(language, parser)
+    }
+
+    // Функция для вычисления схожести
+    fun calculateSimilarity(code: String): Double {
+        val lexer = createLexer(code)
+        val tokenStream = CommonTokenStream(lexer)
+        val parser = createParser(tokenStream)
 
         val strategy = LoggingErrorStrategy()
         parser.errorHandler = strategy
 
         val tree = ParserFactory.createParseTree(language, parser)
-
         val visitor = TokenVisitor()
         visitor.visit(tree)
 
@@ -47,50 +66,37 @@ class CodeAnalyzer(private val language: String) {
         val excludedTypes = setOf(JavaLexer.WS, JavaLexer.COMMENT, JavaLexer.LINE_COMMENT, JavaLexer.EOF)
         val originalTokens = tokenStream.tokens.filter { it.type !in excludedTypes }.map { it.text }
         val collectedTokens = filteredTokens.filter { it.type !in excludedTypes }.map { it.text }
-
-//        println(originalTokens)
-//        println(collectedTokens)
+        this.numberOfSyntaxErrors = parser.numberOfSyntaxErrors
 
         return calculateLevenshteinSimilarity(originalTokens, collectedTokens)
     }
 
+    // Функция для разбора файла
     fun parseFile(file: File): ParseTree {
         val code = Files.readString(Paths.get(file.absolutePath))
-        return parseCode(code)
+        return createParseTree(code)
     }
+
+    // Функция для разбора кода
     fun parseCode(code: String): ParseTree {
-        val lexer = ParserFactory.createLexer(language, code)
-        lexer.removeErrorListeners()
-
-        val tokenStream = CommonTokenStream(lexer)
-        val parser = ParserFactory.createParser(language, tokenStream)
-        parser.removeErrorListeners()
-
-//        val strategy = LoggingErrorStrategy()
-//        parser.errorHandler = strategy
-
-        return ParserFactory.createParseTree(language, parser)
+        return createParseTree(code)
     }
 
-//    Конкретно эти функции нужны чтобы дополнительно парсер доставать, он нужен в showParseTree
+    // Функция для разбора файла с возвращением парсера
     fun parseFileWithParser(file: File): Pair<ParseTree, Parser> {
         val code = Files.readString(Paths.get(file.absolutePath))
         return parseCodeWithParser(code)
     }
+
+    // Функция для разбора кода с возвращением парсера
     fun parseCodeWithParser(code: String): Pair<ParseTree, Parser> {
-        val lexer = ParserFactory.createLexer(language, code)
-        lexer.removeErrorListeners()
-
+        val lexer = createLexer(code)
         val tokenStream = CommonTokenStream(lexer)
-        val parser = ParserFactory.createParser(language, tokenStream)
-        parser.removeErrorListeners()
-
-//        val strategy = LoggingErrorStrategy()
-//        parser.errorHandler = strategy
-
+        val parser = createParser(tokenStream)
         val tree = ParserFactory.createParseTree(language, parser)
         return tree to parser
     }
+
 
     private fun<T> levenshtein(lhs : List<T>, rhs : List<T>) : Int {
         if(lhs == rhs) { return 0 }
@@ -190,11 +196,16 @@ fun processFiles(
 
 
     // Создание BufferedWriter для записи в CSV файл с учетом режима append
-    val writer = Files.newBufferedWriter(Paths.get(outputCsvPath), if (append) StandardOpenOption.APPEND else StandardOpenOption.CREATE)
+    val writer = if (append && File(outputCsvPath).exists()) {
+        Files.newBufferedWriter(Paths.get(outputCsvPath), StandardOpenOption.APPEND)
+    } else {
+        Files.newBufferedWriter(Paths.get(outputCsvPath), StandardOpenOption.CREATE)
+    }
+
     try {
         // Запись заголовков, если файл перезаписывается
         if (!append) {
-            writer.append("File Name,Similarity Score\n")
+            writer.append("File Name,numberOfSyntaxErrors,Similarity Score\n")
         }
 
         // Используем прогресс-бар
@@ -203,7 +214,7 @@ fun processFiles(
                 val similarity = analyzer.calculateSimilarity(file)
 
                 // Записываем данные в CSV сразу
-                writer.append("${file.name},${similarity}\n")
+                writer.append("${file.name},${analyzer.numberOfSyntaxErrors},${similarity}\n")
                 writer.flush() // Сразу записываем в файл
 
                 progressBar.step()
