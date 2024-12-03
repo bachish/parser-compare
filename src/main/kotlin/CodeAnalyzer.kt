@@ -98,7 +98,27 @@ class CodeAnalyzer(private val language: String) {
     }
 
 
-    private fun<T> levenshtein(lhs : List<T>, rhs : List<T>) : Int {
+    private fun <T> calculateLevenshteinSimilarity(a: List<T>, b: List<T>): Double {
+//        Надо памяти больше выделять -Xms4g -Xmx16g
+//        (для этих все равно не хватает)
+//        1981175_88001536, //bmv
+//        45493781_1758766325,
+//        48506454_1863037852, //бананы
+//        8821304_307656826, //xml
+
+        val maxLength = max(a.size, b.size)
+        // Ограничение максимального размера для предотвращения Java heap space
+//        if (maxLength > 50000) {
+//            return -1.0  // Слишком большие данные для вычисления
+//        }
+
+//      Пробуем больше 50к токенов считать линейно
+        val distance = if (maxLength > 50000) levenshteinLine(a, b) else  levenshteinLine(a, b)
+        return if (maxLength > 0) 1 - (distance.toDouble() / maxLength) else 1.0
+    }
+
+    //линейный ливенштейн (медленное)
+    private fun<T> levenshteinLine(lhs : List<T>, rhs : List<T>) : Int {
         if(lhs == rhs) { return 0 }
         if(lhs.isEmpty()) { return rhs.size }
         if(rhs.isEmpty()) { return lhs.size }
@@ -130,20 +150,7 @@ class CodeAnalyzer(private val language: String) {
         return cost[lhsLength - 1]
     }
 
-
-    private fun <T> calculateLevenshteinSimilarity(a: List<T>, b: List<T>): Double {
-        // Ограничение максимального размера для предотвращения Java heap space
-        if (a.size > 20000 || b.size > 20000) {
-            return -1.0  // Слишком большие данные для вычисления
-        }
-        val distance = levenshteinDistance(a, b)
-
-//        val distance = levenshtein(a, b)
-        val maxLength = max(a.size, b.size)
-        return if (maxLength > 0) 1 - (distance.toDouble() / maxLength) else 1.0
-    }
-
-    private fun <T> levenshteinDistance(a: List<T>, b: List<T>): Int {
+    private fun <T> levenshtein(a: List<T>, b: List<T>): Int {
         val dp = Array(a.size + 1) { IntArray(b.size + 1) }
         for (i in 0..a.size) dp[i][0] = i
         for (j in 0..b.size) dp[0][j] = j
@@ -162,73 +169,9 @@ class CodeAnalyzer(private val language: String) {
     }
 }
 
-fun processFiles(
-    directoryPath: String,
-    outputCsvPath: String,
-    analyzer: CodeAnalyzer,
-    maxFiles: Int = Int.MAX_VALUE,
-    append: Boolean = false
-) {
-
-    // Определяем последний обработанный файл, если append = true
-    val startFile = if (append) {
-        val existingLines = File(outputCsvPath).takeIf { it.exists() }?.readLines().orEmpty()
-        existingLines.lastOrNull()?.split(",")?.firstOrNull() // Имя последнего обработанного файла
-    } else {
-        null // Если не append, начинаем с первого файла
-    }
 
 
-    val files = File(directoryPath).listFiles()
-        ?.filter { it.isFile }
-        ?.sortedBy { it.name } // Сортируем файлы по имени для предсказуемости
-        ?.let { fileList ->
-            if (startFile != null) {
-                println("startFile = $startFile")
-                val startIndex = fileList.indexOfFirst { it.name == startFile }
-                if (startIndex != -1) fileList.drop(startIndex + 1) else emptyList()
-            } else {
-                fileList
-            }
-        }
-        ?.take(maxFiles)
-        ?: emptyList()
-
-
-    // Создание BufferedWriter для записи в CSV файл с учетом режима append
-    val writer = if (append && File(outputCsvPath).exists()) {
-        Files.newBufferedWriter(Paths.get(outputCsvPath), StandardOpenOption.APPEND)
-    } else {
-        Files.newBufferedWriter(Paths.get(outputCsvPath), StandardOpenOption.CREATE)
-    }
-
-    try {
-        // Запись заголовков, если файл перезаписывается
-        if (!append) {
-            writer.append("File Name,numberOfSyntaxErrors,Similarity Score\n")
-        }
-
-        // Используем прогресс-бар
-        ProgressBar("Processing Files", files.size.toLong()).use { progressBar ->
-            files.forEach { file ->
-                val similarity = analyzer.calculateSimilarity(file)
-
-                // Записываем данные в CSV сразу
-                writer.append("${file.name},${analyzer.numberOfSyntaxErrors},${similarity}\n")
-                writer.flush() // Сразу записываем в файл
-
-                progressBar.step()
-            }
-        }
-    } finally {
-        writer.close() // Закрытие writer после окончания записи
-    }
-
-    println("Processing complete. Results written to $outputCsvPath")
-}
-
-
-class TokenVisitor : Java8ParserBaseVisitor<Unit>() {
+class TokenVisitor : JavaParserBaseVisitor<Unit>() {
     val collectedTokens = mutableListOf<Token>()
 
     override fun visitTerminal(node: TerminalNode) {

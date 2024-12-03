@@ -6,7 +6,7 @@ import java.io.File
 
 
 fun main() {
-    val language = "java8"
+    val language = "java"
     val analyzer = CodeAnalyzer(language)
     val directoryPath = "C:\\data\\java_src_files"
 //    val maxFiles = 10000
@@ -16,20 +16,20 @@ fun main() {
 
 /////////////////////    основной процессинг
 //    processFiles(directoryPath, outputCsvPath, analyzer, maxFiles)
-    processFiles(directoryPath, outputCsvPath, analyzer,  append = true)
+    processFiles(directoryPath, outputCsvPath, analyzer)
 
 
 
-///////////////////////  Парсим один файл
-//    val filePath = "$directoryPath\\3142580_110474263"
+/////////////////////////  Парсим один файл
+//    val filePath = "$directoryPath\\18591979_776331290"
 //    val file = File(filePath)
 //    val (tree, parser) = analyzer.parseFileWithParser(file)
 //    val score = analyzer.calculateSimilarity(file)
 //    println("score: $score")
 //    showParseTree(parser, tree)
-//
-//
-//
+
+
+
 
 ////////////////////////    Парсим строчку
 ////    val javaCode = "public class ProductTester;".trimIndent()
@@ -49,4 +49,15 @@ fun main() {
 ////    println(parserFromString)
 //    showParseTree(parserFromString, treeFromString)
 
+
+///////////////////////////////////////////// Парсим список
+//    val files = listOf(
+//        "1981175_88001536", //bmv
+//        "45493781_1758766325",
+//        "48506454_1863037852",
+//        "8821304_307656826", //xml
+//        )
+//
+//    parseList(files, directoryPath, analyzer)
 }
+
