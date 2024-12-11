@@ -16,12 +16,12 @@ fun main() {
 
 /////////////////////    основной процессинг
 //    processFiles(directoryPath, outputCsvPath, analyzer, maxFiles)
-    processFiles(directoryPath, outputCsvPath, analyzer)
+//    processFiles(directoryPath, outputCsvPath, analyzer)
 
 
 
 /////////////////////////  Парсим один файл
-//    val filePath = "$directoryPath\\18591979_776331290"
+//    val filePath = "$directoryPath\\38614002_1457569052"
 //    val file = File(filePath)
 //    val (tree, parser) = analyzer.parseFileWithParser(file)
 //    val score = analyzer.calculateSimilarity(file)
@@ -31,23 +31,22 @@ fun main() {
 
 
 
-////////////////////////    Парсим строчку
-////    val javaCode = "public class ProductTester;".trimIndent()
-//    val javaCode = """
-//        public class Main {
-//          public static void main(String[] args)
-//          {
-//            do {}
-//          }
-//        }
-//    """.trimIndent()
-//    val (treeFromString, parserFromString) = analyzer.parseCodeWithParser(javaCode)
-//    val score = analyzer.calculateSimilarity(javaCode)
-//
-//    println("score: $score")
-//    println(parserFromString.numberOfSyntaxErrors)
-////    println(parserFromString)
-//    showParseTree(parserFromString, treeFromString)
+//////////////////////    Парсим строчку
+//    val javaCode = "public class ProductTester;".trimIndent()
+    val javaCode = """
+        public class Main {
+          public static void main(String[] args){
+              ArrayList<int> s = new ArrayList<int>();
+            }
+        }
+    """.trimIndent()
+    val (treeFromString, parserFromString) = analyzer.parseCodeWithParser(javaCode)
+    val score = analyzer.calculateSimilarity(javaCode)
+
+    println("score: $score")
+    println(parserFromString.numberOfSyntaxErrors)
+//    println(parserFromString)
+    showParseTree(parserFromString, treeFromString)
 
 
 ///////////////////////////////////////////// Парсим список

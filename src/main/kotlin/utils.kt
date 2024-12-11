@@ -137,7 +137,7 @@ fun processFiles(
     try {
         // Запись заголовков, если файл перезаписывается
         if (openOption == StandardOpenOption.CREATE) {
-            writer.append("File Name,Number of Syntax Errors,Similarity Score\n")
+            writer.append("fileName,numberOfSyntaxErrors,similarityScore\n")
         }
 
 
