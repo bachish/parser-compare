@@ -101,7 +101,17 @@ object JavacRunnerWithProgress {
             listOf(fileObject)
         ) as JavacTask
 
-        task.parse()
+//        java.lang.IllegalStateException: java.lang.AssertionError
+        try {
+            task.parse()
+        } catch (e: Throwable){
+//            listOf(null to "Error occurred: ${e.message}")
+        }
+
+
+
+
+
 
         // Извлекаем код ошибки и сообщение
         return diagnostics.diagnostics.map { diagnostic ->
