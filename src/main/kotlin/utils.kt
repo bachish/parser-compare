@@ -1,5 +1,7 @@
 import me.tongfei.progressbar.ProgressBar
 import org.antlr.v4.gui.TreeViewer
+import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.Lexer
 import org.antlr.v4.runtime.tree.ParseTree
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -137,7 +139,7 @@ fun processFiles(
     try {
         // Запись заголовков, если файл перезаписывается
         if (openOption == StandardOpenOption.CREATE) {
-            writer.append("fileName,numberOfSyntaxErrors,similarityScore\n")
+            writer.append("fileName,numberOfSyntaxErrors,numberOfLexerErrors,similarityScore,distance,numberOfParsedTokens\n")
         }
 
 
@@ -148,7 +150,13 @@ fun processFiles(
             files.forEach { file ->
                 val similarity = analyzer.calculateSimilarity(file)
 
-                writer.append("${file.name},${analyzer.numberOfSyntaxErrors},${similarity}\n")
+                writer.append(
+                            "${file.name}," +
+                            "${analyzer.numberOfSyntaxErrors}," +
+                            "${analyzer.numberOfLexerErrors}," +
+                            "${similarity},${analyzer.distance}," +
+                            "${analyzer.numberOfParsedTokens}\n"
+                )
                 writer.flush() // Сразу записываем в файл
 
                 pb.step()
@@ -162,4 +170,59 @@ fun processFiles(
     }
 
     println("Processing complete. Results written to $outputCsvPath")
+}
+
+
+
+fun processFilesForTokensAndChars(
+    language: String,
+    directoryPath: String,
+    outputCsvPath: String,
+    append: Boolean = true
+) {
+    // Определяем режим открытия файла
+    val openOption = if (append && File(outputCsvPath).exists()) StandardOpenOption.APPEND else StandardOpenOption.CREATE
+
+    // Создаем BufferedWriter для записи в CSV
+    val writer = Files.newBufferedWriter(Paths.get(outputCsvPath), openOption)
+    try {
+        // Если создаем новый файл, записываем заголовок
+        if (openOption == StandardOpenOption.CREATE) {
+            writer.append("fileName,numberOfTokens,numberOfCharacters\n")
+        }
+
+        // Получаем список файлов из директории
+        val files = File(directoryPath).listFiles()?.filter { it.isFile } ?: emptyList()
+        ProgressBar("Processing Files", files.size.toLong()).use { pb ->
+
+            files.forEach { file ->
+                try {
+                    // Считываем содержимое файла
+                    val content = file.readText()
+
+                    // Создаем лексер и токенизируем содержимое
+                    val lexer = ParserFactory.createLexer(language, content)
+                    lexer.removeErrorListeners()
+
+                    val tokenStream = CommonTokenStream(lexer)
+                    tokenStream.fill() // Загружаем все токены
+                    val tokenCount = tokenStream.tokens.size
+
+                    // Считаем количество символов в файле
+                    val charCount = content.length
+
+                    // Записываем данные в CSV
+                    writer.append("${file.name},$tokenCount,$charCount\n")
+                    writer.flush()
+                    pb.step()
+                } catch (e: Exception) {
+                    println("Ошибка обработки файла ${file.name}: ${e.message}")
+                }
+            }
+        }
+    } finally {
+        writer.close() // Закрываем writer после использования
+    }
+
+    println("Обработка завершена. Результаты записаны в $outputCsvPath")
 }

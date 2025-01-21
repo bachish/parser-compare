@@ -3,7 +3,6 @@ package org.example
 import com.sun.source.util.JavacTask
 import me.tongfei.progressbar.ProgressBar
 import java.io.File
-import java.io.FileWriter
 import java.io.IOException
 import java.net.URI
 import java.nio.file.Files
@@ -72,7 +71,7 @@ object JavacRunnerWithProgress {
 
                     // Записываем результаты в CSV
                     if (errors.isEmpty()) {
-                        writer.append("${file.name},No Error,Compilation successful\n")
+                        writer.append("${file.name},No Error,Success\n")
                     } else {
                         for (error in errors) {
                             writer.append("${file.name},\"${error.first}\",\"${error.second}\"\n")

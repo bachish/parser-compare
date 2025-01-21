@@ -1,6 +1,5 @@
 import antlr.java.JavaLexer
 import antlr.java.JavaParserBaseVisitor
-import me.tongfei.progressbar.ProgressBar
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTree
@@ -10,8 +9,6 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.math.max
-import antlr.java8.Java8ParserBaseVisitor
-import java.nio.file.StandardOpenOption
 
 import kotlin.math.min
 
@@ -20,6 +17,10 @@ import kotlin.math.min
 // Универсальный класс для анализа исходного кода
 class CodeAnalyzer(private val language: String) {
     var numberOfSyntaxErrors: Int? = null
+    var numberOfLexerErrors: Int? = null
+    var distance: Int? = null
+    var numberOfParsedTokens: Int? = null
+
     fun calculateSimilarity(file: File): Double {
         val code = Files.readString(Paths.get(file.absolutePath))
         return calculateSimilarity(code)
@@ -46,9 +47,26 @@ class CodeAnalyzer(private val language: String) {
         return ParserFactory.createParseTree(language, parser)
     }
 
-    // Функция для вычисления схожести
     fun calculateSimilarity(code: String): Double {
         val lexer = createLexer(code)
+
+        // Создаем кастомный обработчик ошибок для лексера
+        val lexerErrorListener = object : BaseErrorListener() {
+            var errorCount = 0
+            override fun syntaxError(
+                recognizer: Recognizer<*, *>?,
+                offendingSymbol: Any?,
+                line: Int,
+                charPositionInLine: Int,
+                msg: String?,
+                e: RecognitionException?
+            ) {
+                errorCount++ // Увеличиваем счетчик ошибок
+            }
+        }
+        lexer.removeErrorListeners()
+        lexer.addErrorListener(lexerErrorListener)
+
         val tokenStream = CommonTokenStream(lexer)
         val parser = createParser(tokenStream)
 
@@ -68,8 +86,13 @@ class CodeAnalyzer(private val language: String) {
         val collectedTokens = filteredTokens.filter { it.type !in excludedTypes }.map { it.text }
         this.numberOfSyntaxErrors = parser.numberOfSyntaxErrors
 
+        // Сохраняем количество ошибок лексера
+        this.numberOfLexerErrors = lexerErrorListener.errorCount
+        this.numberOfParsedTokens = collectedTokens.size
+
         return calculateLevenshteinSimilarity(originalTokens, collectedTokens)
     }
+
 
     // Функция для разбора файла
     fun parseFile(file: File): ParseTree {
@@ -114,6 +137,9 @@ class CodeAnalyzer(private val language: String) {
 
 //      Пробуем больше 50к токенов считать линейно
         val distance = if (maxLength > 50000) levenshteinLine(a, b) else  levenshteinLine(a, b)
+
+        this.distance = distance
+
         return if (maxLength > 0) 1 - (distance.toDouble() / maxLength) else 1.0
     }
 
@@ -188,7 +214,6 @@ class TokenVisitor : JavaParserBaseVisitor<Unit>() {
             channel = Token.DEFAULT_CHANNEL
         }
 
-        // Добавляем этот токен в список
         collectedTokens.add(errorToken)
     }
 

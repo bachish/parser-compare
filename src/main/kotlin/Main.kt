@@ -14,9 +14,12 @@ fun main() {
 //    val outputCsvPath = "C:\\data\\${language}_scores.csv"
 
 
-/////////////////////    основной процессинг
+//    collectTokenCount()
+
+
+///////////////////    основной процессинг
 //    processFiles(directoryPath, outputCsvPath, analyzer, maxFiles)
-//    processFiles(directoryPath, outputCsvPath, analyzer)
+    processFiles(directoryPath, outputCsvPath, analyzer)
 
 
 
@@ -31,22 +34,21 @@ fun main() {
 
 
 
-//////////////////////    Парсим строчку
-//    val javaCode = "public class ProductTester;".trimIndent()
-    val javaCode = """
-        public class Main {
-          public static void main(String[] args){
-              ArrayList<int> s = new ArrayList<int>();
-            }
-        }
-    """.trimIndent()
-    val (treeFromString, parserFromString) = analyzer.parseCodeWithParser(javaCode)
-    val score = analyzer.calculateSimilarity(javaCode)
-
-    println("score: $score")
-    println(parserFromString.numberOfSyntaxErrors)
-//    println(parserFromString)
-    showParseTree(parserFromString, treeFromString)
+////////////////////////    Парсим строчку
+////    val javaCode = "public class ProductTester;".trimIndent()
+//    val javaCode = """
+//class App {
+//    public static void main(String[] args) {
+//    }
+//
+//    """.trimIndent()
+//    val (treeFromString, parserFromString) = analyzer.parseCodeWithParser(javaCode)
+//    val score = analyzer.calculateSimilarity(javaCode)
+//
+//    println("score: $score")
+//    println(parserFromString.numberOfSyntaxErrors)
+////    println(parserFromString)
+//    showParseTree(parserFromString, treeFromString)
 
 
 ///////////////////////////////////////////// Парсим список
@@ -60,3 +62,17 @@ fun main() {
 //    parseList(files, directoryPath, analyzer)
 }
 
+fun collectTokenCount() {
+
+    val language = "java"
+    val directoryPath = "C:\\data\\java_src_files"
+    val outputCsvPath = "tokens_and_chars.csv" // Укажите путь к выходному CSV-файлу
+
+    processFilesForTokensAndChars(
+        language = language,
+        directoryPath = directoryPath,
+        outputCsvPath = outputCsvPath,
+        append = true
+    )
+
+}

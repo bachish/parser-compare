@@ -242,15 +242,7 @@ public class Spirit extends Thread implements Role {
             null, null,
             diagnostics, null, null, files
         ) as JavacTask
-        try {
-            task.parse()
-        } catch (e: AssertionError) {
-            println(123)
-        }
-        catch (e: IllegalStateException) {
-            println(1234)
 
-        }
 
         for (d in diagnostics.diagnostics) {
             System.out.printf(
