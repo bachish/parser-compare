@@ -226,3 +226,18 @@ fun processFilesForTokensAndChars(
 
     println("Обработка завершена. Результаты записаны в $outputCsvPath")
 }
+
+fun collectTokenCount() {
+
+    val language = "java"
+    val directoryPath = "C:\\data\\java_src_files"
+    val outputCsvPath = "tokens_and_chars.csv" // Укажите путь к выходному CSV-файлу
+
+    processFilesForTokensAndChars(
+        language = language,
+        directoryPath = directoryPath,
+        outputCsvPath = outputCsvPath,
+        append = true
+    )
+
+}

@@ -1,5 +1,6 @@
 import antlr.java.JavaLexer
 import antlr.java.JavaParserBaseVisitor
+import antlr.java8.Java8ParserBaseVisitor
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.ParseTree
@@ -136,14 +137,15 @@ class CodeAnalyzer(private val language: String) {
 //        }
 
 //      Пробуем больше 50к токенов считать линейно
-        val distance = if (maxLength > 50000) levenshteinLine(a, b) else  levenshteinLine(a, b)
+//        val distance = if (maxLength > 50000) levenshteinLine(a, b) else  levenshteinLine(a, b)
+        val distance = levenshteinLine(a, b)
 
         this.distance = distance
 
         return if (maxLength > 0) 1 - (distance.toDouble() / maxLength) else 1.0
     }
 
-    //линейный ливенштейн (медленное)
+    //линейный ливенштейн (медленное(или нет))
     private fun<T> levenshteinLine(lhs : List<T>, rhs : List<T>) : Int {
         if(lhs == rhs) { return 0 }
         if(lhs.isEmpty()) { return rhs.size }
@@ -193,11 +195,23 @@ class CodeAnalyzer(private val language: String) {
         }
         return dp[a.size][b.size]
     }
+
+
+    // В классе CodeAnalyzer должен быть метод parse, который парсит файл без возвращения значений
+    fun hollowParse(code: String) {
+        val lexer = createLexer(code)
+        val tokenStream = CommonTokenStream(lexer)
+        val parser = createParser(tokenStream)
+        val tree = ParserFactory.createParseTree(language, parser)
+        val visitor = TokenVisitor()
+        visitor.visit(tree)
+    }
+
 }
 
 
-
-class TokenVisitor : JavaParserBaseVisitor<Unit>() {
+//class TokenVisitor : JavaParserBaseVisitor<Unit>() {
+class TokenVisitor : Java8ParserBaseVisitor<Unit>() {
     val collectedTokens = mutableListOf<Token>()
 
     override fun visitTerminal(node: TerminalNode) {

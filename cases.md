@@ -8,3 +8,6 @@
 Все файлы обрабатывались 0:23:58 обычной жавой. 
 С ограничением на 20к токенов не прощло 30 файлов.
 
+startFile = 39080811_1478680581
+Processing Files  63% │█████████████▉        │ 42741/67717 (1:25:50 / 0:50:09)
+Exception in thread "main" java.lang.OutOfMemoryError: Java heap space

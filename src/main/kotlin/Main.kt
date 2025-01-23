@@ -6,7 +6,7 @@ import java.io.File
 
 
 fun main() {
-    val language = "java"
+    val language = "java8"
     val analyzer = CodeAnalyzer(language)
     val directoryPath = "C:\\data\\java_src_files"
 //    val maxFiles = 10000
@@ -16,10 +16,13 @@ fun main() {
 
 //    collectTokenCount()
 
+///////////////////    сбор времени исполнения
+    measureParsingTime(directoryPath,"C:\\data\\${language}_times.csv",analyzer, warmupFilesCount = 100)
+
+
 
 ///////////////////    основной процессинг
-//    processFiles(directoryPath, outputCsvPath, analyzer, maxFiles)
-    processFiles(directoryPath, outputCsvPath, analyzer)
+//    processFiles(directoryPath, outputCsvPath, analyzer)
 
 
 
@@ -37,9 +40,13 @@ fun main() {
 ////////////////////////    Парсим строчку
 ////    val javaCode = "public class ProductTester;".trimIndent()
 //    val javaCode = """
-//class App {
-//    public static void main(String[] args) {
-//    }
+//public class Simple {
+//   public static void main(String[] args) {
+//       int x = 10;
+//       x; // Not a statement
+//   }
+//}
+//
 //
 //    """.trimIndent()
 //    val (treeFromString, parserFromString) = analyzer.parseCodeWithParser(javaCode)
@@ -62,17 +69,3 @@ fun main() {
 //    parseList(files, directoryPath, analyzer)
 }
 
-fun collectTokenCount() {
-
-    val language = "java"
-    val directoryPath = "C:\\data\\java_src_files"
-    val outputCsvPath = "tokens_and_chars.csv" // Укажите путь к выходному CSV-файлу
-
-    processFilesForTokensAndChars(
-        language = language,
-        directoryPath = directoryPath,
-        outputCsvPath = outputCsvPath,
-        append = true
-    )
-
-}
