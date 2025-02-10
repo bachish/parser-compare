@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "2.0.20"
+    application
 }
 
 group = "org.example"
@@ -30,3 +31,21 @@ sourceSets {
         }
     }
 }
+
+application {
+    mainClass.set("RunnerKt")
+}
+
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "RunnerKt"  // Указание на главный класс
+    }
+
+    // Собираем все зависимости в один JAR (fat jar)
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+
+    // Добавляем содержимое исходных файлов
+    from(sourceSets.main.get().output)
+}
+
+

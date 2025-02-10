@@ -1,14 +1,10 @@
 import java.io.File
 
-// 10 штук руками посмотреть которые никто не распарсил
-// отфильтровать торлько те которые один рапарсил и достать от туда сообщения об ошибках
-// те которые никто не распарсил прогнать чеерез жвм (через питон легко)
-
 
 fun main() {
     val language = "java8"
     val analyzer = CodeAnalyzer(language)
-    val directoryPath = "C:\\data\\java_src_files"
+    val directoryPath = "C:\\data\\java_src_files"              // где лежит датасет
 //    val maxFiles = 10000
     val outputCsvPath = "C:\\data\\${language}_all_scores.csv"
 //    val outputCsvPath = "C:\\data\\${language}_scores.csv"
@@ -17,7 +13,7 @@ fun main() {
 //    collectTokenCount()
 
 ///////////////////    сбор времени исполнения
-    measureParsingTime(directoryPath,"C:\\data\\${language}_times.csv",analyzer, warmupFilesCount = 100)
+//    measureParsingTime(directoryPath,"C:\\data\\${language}_times.csv",analyzer, warmupFilesCount = 100)
 
 
 
@@ -37,25 +33,25 @@ fun main() {
 
 
 
-////////////////////////    Парсим строчку
-////    val javaCode = "public class ProductTester;".trimIndent()
-//    val javaCode = """
-//public class Simple {
-//   public static void main(String[] args) {
-//       int x = 10;
-//       x; // Not a statement
-//   }
-//}
-//
-//
-//    """.trimIndent()
-//    val (treeFromString, parserFromString) = analyzer.parseCodeWithParser(javaCode)
-//    val score = analyzer.calculateSimilarity(javaCode)
-//
-//    println("score: $score")
-//    println(parserFromString.numberOfSyntaxErrors)
-////    println(parserFromString)
-//    showParseTree(parserFromString, treeFromString)
+//////////////////////    Парсим строчку
+//    val javaCode = "public class ProductTester;".trimIndent()
+    val javaCode = """
+public class Simple {
+   public static void main(String[] args) {
+       int x = 10;
+       x; // Not a statement
+   }
+}
+
+
+    """.trimIndent()
+    val (treeFromString, parserFromString) = analyzer.parseCodeWithParser(javaCode)
+    val score = analyzer.calculateSimilarity(javaCode)
+
+    println("score: $score")
+    println(parserFromString.numberOfSyntaxErrors)
+//    println(parserFromString)
+    showParseTree(parserFromString, treeFromString)
 
 
 ///////////////////////////////////////////// Парсим список

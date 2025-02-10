@@ -203,8 +203,10 @@ class CodeAnalyzer(private val language: String) {
         val tokenStream = CommonTokenStream(lexer)
         val parser = createParser(tokenStream)
         val tree = ParserFactory.createParseTree(language, parser)
-        val visitor = TokenVisitor()
-        visitor.visit(tree)
+
+//        строго важно визитор не делаем
+//        val visitor = TokenVisitor()
+//        visitor.visit(tree)
     }
 
 }

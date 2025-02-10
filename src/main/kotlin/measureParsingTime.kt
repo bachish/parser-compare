@@ -11,11 +11,30 @@ fun measureParsingTime(
     outputCsvPath: String,
     analyzer: CodeAnalyzer,
     warmupFilesCount: Int = 10,
-    maxFiles: Int = Int.MAX_VALUE
+    maxFiles: Int = Int.MAX_VALUE,
+    append: Boolean = true
 ) {
+    // Определяем последний обработанный файл, если append = true
+    val startFile = if (append) {
+        val existingLines = File(outputCsvPath).takeIf { it.exists() }?.readLines().orEmpty()
+        existingLines.lastOrNull()?.split(",")?.firstOrNull() // Имя последнего обработанного файла
+    } else {
+        null // Если не append, начинаем с первого файла
+    }
+
     val files = File(directoryPath).listFiles()
         ?.filter { it.isFile }
-        ?.sortedBy { it.name }
+        ?.sortedBy { it.name } // Сортируем файлы по имени для предсказуемости
+        ?.let { fileList ->
+            if (startFile != null) {
+                println("Continuing from file: $startFile")
+                val startIndex = fileList.indexOfFirst { it.name == startFile }
+                if (startIndex != -1) fileList.drop(startIndex + 1) else emptyList()
+            } else {
+                fileList
+            }
+        }
+        ?.take(maxFiles)
         ?: emptyList()
 
     // Прогрев JVM на случайных файлах
@@ -31,23 +50,22 @@ fun measureParsingTime(
     println("JVM warmup complete.")
 
     // Определение режима для BufferedWriter
-    val openOption = if (File(outputCsvPath).exists()) StandardOpenOption.APPEND else StandardOpenOption.CREATE
+    val openOption = if (append && File(outputCsvPath).exists()) StandardOpenOption.APPEND else StandardOpenOption.CREATE
 
     // Создание BufferedWriter для записи в CSV файл
     val writer = Files.newBufferedWriter(Paths.get(outputCsvPath), openOption)
     try {
-        // Запись заголовков, если файл перезаписывается
+        // Запись заголовков, если файл создается заново
         if (openOption == StandardOpenOption.CREATE) {
             writer.append("fileName,parsingTimeNanos\n")
         }
 
         // Используем прогресс-бар
         ProgressBar("Measuring Parsing Time", files.size.toLong()).use { pb ->
-            files.take(maxFiles).forEach { file ->
+            files.forEach { file ->
                 val code = file.readText()
 
                 val parsingTime = measureNanoTime {
-
                     analyzer.hollowParse(code)
                 }
 
@@ -63,4 +81,3 @@ fun measureParsingTime(
 
     println("Parsing time measurement complete. Results written to $outputCsvPath")
 }
-
