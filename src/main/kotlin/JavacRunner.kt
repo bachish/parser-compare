@@ -13,11 +13,22 @@ import javax.tools.JavaFileObject
 import javax.tools.SimpleJavaFileObject
 import javax.tools.ToolProvider
 
+data class CompilationError(
+    val code: String,
+    val message: String,
+    val position: Long,
+    val endPosition: Long,
+    val columnNumber: Long,
+    val lineNumber: Long
+)
+
+
+
 object JavacRunnerWithProgress {
     @JvmStatic
     fun main(args: Array<String>) {
         val directoryPath = "C:/data/java_src_files_java/" // Директория с файлами
-        val outputCsvPath = "output_with_progress.csv"     // Путь к CSV для записи
+        val outputCsvPath = "output_with_progress-3.csv"   // Путь к CSV для записи
         val maxFiles = Int.MAX_VALUE                       // Максимальное количество файлов
         val append = true                                  // Режим добавления
         processFiles(directoryPath, outputCsvPath, maxFiles, append)
@@ -60,7 +71,7 @@ object JavacRunnerWithProgress {
         try {
             // Записываем заголовок, если файл создается с нуля
             if (openOption == StandardOpenOption.CREATE) {
-                writer.append("fileName,errorCode,errorMessage\n")
+                writer.append("fileName,code,message,position,end_position,column_number,line_number\n")
             }
 
             // Используем ProgressBar для отображения прогресса
@@ -71,10 +82,18 @@ object JavacRunnerWithProgress {
 
                     // Записываем результаты в CSV
                     if (errors.isEmpty()) {
-                        writer.append("${file.name},No Error,Success\n")
+                        writer.append("${file.name},No Error,Success,Null,Null,Null,Null\n")
                     } else {
                         for (error in errors) {
-                            writer.append("${file.name},\"${error.first}\",\"${error.second}\"\n")
+                            writer.append(
+                                "${file.name}," +
+                                "\"${error.code}\"," +
+                                "\"${error.message}\"," +
+                                "\"${error.position}\"," +
+                                "\"${error.endPosition}\"," +
+                                "\"${error.columnNumber}\"" +
+                                "\"${error.lineNumber}\"\n"
+                            )
                         }
                     }
                     writer.flush() // Сразу записываем в файл
@@ -90,7 +109,7 @@ object JavacRunnerWithProgress {
     }
 
     @Throws(IOException::class)
-    private fun compileJavaFile(file: File): List<Pair<String, String>> {
+    private fun compileJavaFile(file: File): List<CompilationError> {
         val compiler = ToolProvider.getSystemJavaCompiler()
         val diagnostics = DiagnosticCollector<JavaFileObject>()
         val fileObject = JavaSourceFromFile(file)
@@ -100,23 +119,24 @@ object JavacRunnerWithProgress {
             listOf(fileObject)
         ) as JavacTask
 
-//        java.lang.IllegalStateException: java.lang.AssertionError
         try {
             task.parse()
-        } catch (e: Throwable){
-//            listOf(null to "Error occurred: ${e.message}")
+        } catch (e: Throwable) {
+//            return listOf(CompilationError("", "Error occurred: ${e.message}", -1, -1, -1, -1))
         }
 
-
-
-
-
-
-        // Извлекаем код ошибки и сообщение
         return diagnostics.diagnostics.map { diagnostic ->
-            diagnostic.code to diagnostic.getMessage(null)
+            CompilationError(
+                diagnostic.code,
+                diagnostic.getMessage(null),
+                diagnostic.position,
+                diagnostic.endPosition,
+                diagnostic.columnNumber.toLong(),
+                diagnostic.lineNumber.toLong()
+            )
         }
     }
+
 
     private class JavaSourceFromFile(file: File) :
         SimpleJavaFileObject(

@@ -2,7 +2,7 @@ import java.io.File
 
 //import CodeAnalyzer
 fun main(args: Array<String>) {
-    val language = "java"
+    val language = "java8"
     val analyzer = CodeAnalyzer(language)
 
     val filePath = args[0]

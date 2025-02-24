@@ -86,7 +86,7 @@ class CodeAnalyzer(private val language: String) {
         val originalTokens = tokenStream.tokens.filter { it.type !in excludedTypes }.map { it.text }
         val collectedTokens = filteredTokens.filter { it.type !in excludedTypes }.map { it.text }
         this.numberOfSyntaxErrors = parser.numberOfSyntaxErrors
-
+//        parser.errorHandler.toString()
         // Сохраняем количество ошибок лексера
         this.numberOfLexerErrors = lexerErrorListener.errorCount
         this.numberOfParsedTokens = collectedTokens.size

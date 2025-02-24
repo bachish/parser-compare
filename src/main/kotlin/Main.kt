@@ -2,7 +2,7 @@ import java.io.File
 
 
 fun main() {
-    val language = "java8"
+    val language = "java"
     val analyzer = CodeAnalyzer(language)
     val directoryPath = "C:\\data\\java_src_files"              // где лежит датасет
 //    val maxFiles = 10000
@@ -36,15 +36,12 @@ fun main() {
 //////////////////////    Парсим строчку
 //    val javaCode = "public class ProductTester;".trimIndent()
     val javaCode = """
-public class Simple {
-   public static void main(String[] args) {
-       int x = 10;
-       x; // Not a statement
-   }
-}
-
-
-    """.trimIndent()
+                 public class Test {
+                     public static void main(String[] args) {
+                         System.out.println("Hello World!");
+                     }
+                 }
+         """.trimIndent()
     val (treeFromString, parserFromString) = analyzer.parseCodeWithParser(javaCode)
     val score = analyzer.calculateSimilarity(javaCode)
 
