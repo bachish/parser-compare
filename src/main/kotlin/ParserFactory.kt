@@ -36,3 +36,22 @@ class ParserFactory {
         }
     }
 }
+
+//public interface IParser {
+//    fun parse(input: String) : ArrayList<*>
+//    fun getRuleNames(parser: Parser): List<String>
+//    fun random(a: Int) = parse()
+//}
+//
+//
+//class Java8Parser : IParser{
+//    val parser : Parser
+//    override fun parse(input: String): ArrayList<*> {
+//        TODO("Not yet implemented")
+//    }
+//
+//    override fun getRuleNames(parser: Parser): List<String> {
+//        parser.ruleNames.toList()
+//    }
+//
+//}

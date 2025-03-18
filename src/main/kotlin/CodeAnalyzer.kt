@@ -197,7 +197,7 @@ class CodeAnalyzer(private val language: String) {
     }
 
 
-    // В классе CodeAnalyzer должен быть метод parse, который парсит файл без возвращения значений
+    // В классе CodeAnalyzer должен быть метод parse, который парсит файл без возвращения значений (для замеров скорости и потребления памяти)
     fun hollowParse(code: String) {
         val lexer = createLexer(code)
         val tokenStream = CommonTokenStream(lexer)

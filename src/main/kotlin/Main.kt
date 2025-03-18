@@ -36,12 +36,12 @@ fun main() {
 //////////////////////    Парсим строчку
 //    val javaCode = "public class ProductTester;".trimIndent()
     val javaCode = """
-                 public class Test {
-                     public static void main(String[] args) {
-                         System.out.println("Hello World!");
-                     }
-                 }
-         """.trimIndent()
+        public class Test {
+            public static void main(String[] args) {
+                const int i = 5;
+            }
+        }
+    """.trimIndent()
     val (treeFromString, parserFromString) = analyzer.parseCodeWithParser(javaCode)
     val score = analyzer.calculateSimilarity(javaCode)
 
