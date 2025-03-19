@@ -1,5 +1,4 @@
 import antlr.java.JavaLexer
-import antlr.java.JavaParserBaseVisitor
 import antlr.java8.Java8ParserBaseVisitor
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.tree.ErrorNode
@@ -16,7 +15,7 @@ import kotlin.math.min
 
 
 // Универсальный класс для анализа исходного кода
-class CodeAnalyzer(private val language: String) {
+class OldCodeAnalyzer(private val language: String) {
     var numberOfSyntaxErrors: Int? = null
     var numberOfLexerErrors: Int? = null
     var distance: Int? = null

@@ -1,7 +1,6 @@
 import me.tongfei.progressbar.ProgressBar
 import org.antlr.v4.gui.TreeViewer
 import org.antlr.v4.runtime.CommonTokenStream
-import org.antlr.v4.runtime.Lexer
 import org.antlr.v4.runtime.tree.ParseTree
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -73,7 +72,7 @@ fun showParseTree(parser: Parser, tree: ParseTree) {
     frame.isVisible = true
 }
 
-fun parseList(fileNames: List<String>, directoryPath: String, analyzer: CodeAnalyzer) {
+fun parseList(fileNames: List<String>, directoryPath: String, analyzer: OldCodeAnalyzer) {
     val directory = File(directoryPath)
 
     // Проверяем, что файлы из списка существуют
@@ -101,7 +100,7 @@ fun parseList(fileNames: List<String>, directoryPath: String, analyzer: CodeAnal
 fun processFiles(
     directoryPath: String,
     outputCsvPath: String,
-    analyzer: CodeAnalyzer,
+    analyzer: OldCodeAnalyzer,
     maxFiles: Int = Int.MAX_VALUE,
     append: Boolean = true
 ) {

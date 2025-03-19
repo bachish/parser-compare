@@ -1,9 +1,6 @@
-import java.io.File
-
-
 fun main() {
     val language = "java"
-    val analyzer = CodeAnalyzer(language)
+    val analyzer = OldCodeAnalyzer(language)
     val directoryPath = "C:\\data\\java_src_files"              // где лежит датасет
 //    val maxFiles = 10000
     val outputCsvPath = "C:\\data\\${language}_all_scores.csv"

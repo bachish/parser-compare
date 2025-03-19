@@ -3,13 +3,12 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import kotlin.system.measureNanoTime
-import kotlin.random.Random
 import me.tongfei.progressbar.ProgressBar
 
 fun measureParsingTime(
     directoryPath: String,
     outputCsvPath: String,
-    analyzer: CodeAnalyzer,
+    analyzer: OldCodeAnalyzer,
     warmupFilesCount: Int = 10,
     maxFiles: Int = Int.MAX_VALUE,
     append: Boolean = true
