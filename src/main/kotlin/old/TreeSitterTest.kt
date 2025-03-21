@@ -1,18 +1,22 @@
+package old
 //import org.treesitter.TSParser
 //import org.treesitter.TreeSitterJava
 //
+//// not a statement?
+//val missingId = """public class Simple {
+//int main(){
+//    a+ b +; }}"""
+//
+//val errorDeleted = """public class Simple {
+//int main(){}}}
+//   """
 //
 //fun main() {
 //    val parser = TSParser()
 //    parser.setLanguage(TreeSitterJava())
 //
 //    val code = """
-//public class Simple {
-//    public static void main(String[] args) {
-//        int x = '2';
-//        x; // Not a statement
-//    }
-//}
+//int main(){}}}
 //    """.trimIndent()
 //
 //    val tree = parser.parseString(null, code)
@@ -20,7 +24,7 @@
 //    renderDotGraph(dotString)
 //}
 
-import jflexLexer.JavaToken
+import old.jflexLexer.JavaToken
 import jflexLexer.TreeSitterLexer
 import java.io.StringReader
 import org.treesitter.TSParser

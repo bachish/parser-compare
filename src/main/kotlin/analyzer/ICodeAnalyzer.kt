@@ -8,10 +8,10 @@ import java.nio.file.Paths
 import kotlin.math.max
 import kotlin.math.min
 
-// Интерфейс для анализа кода
-interface ICodeAnalyzer {
-    fun getLexerTokens(code: String): List<String>
-    fun getParserTokens(code: String): List<String>
+// Интерфейс для анализа кода (T - тип токенов)
+interface ICodeAnalyzer<T> {
+    fun getLexerTokens(code: String): List<T>
+    fun getParserTokens(code: String): List<T>
 
     fun calculateSimilarity(code: String): Double {
         val lexerTokens = getLexerTokens(code)
@@ -66,7 +66,7 @@ object LevenshteinUtils {
 
 
 // Пример реализации для не-ANTLR парсера
-class NewAnalyzer : ICodeAnalyzer {
+class NewAnalyzer : ICodeAnalyzer<String> {
     override fun getLexerTokens(code: String): List<String> {
         return code.split(" ").filter { it.isNotBlank() }
     }

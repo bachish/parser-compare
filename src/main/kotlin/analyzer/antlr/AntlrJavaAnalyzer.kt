@@ -6,9 +6,9 @@ import antlr.java.JavaParser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 
-// Реализация для Java с использованием ANTLR
-class AntlrJavaAnalyzer : ICodeAnalyzer {
-    override fun getLexerTokens(code: String): List<String> {
+// Реализация для Java с использованием ANTLR (токены как пара текст-тип)
+class AntlrJavaAnalyzer : ICodeAnalyzer<Int> {
+    override fun getLexerTokens(code: String): List<Int> {
         val lexer = JavaLexer(CharStreams.fromString(code))
         lexer.removeErrorListeners()
         val tokenStream = CommonTokenStream(lexer)
@@ -16,11 +16,12 @@ class AntlrJavaAnalyzer : ICodeAnalyzer {
         val excludedTypes = setOf(JavaLexer.WS, JavaLexer.COMMENT, JavaLexer.LINE_COMMENT, JavaLexer.EOF)
         return tokenStream.tokens
             .filter { it.type !in excludedTypes }
-            .map { it.text }
+            .map {  it.type }
     }
 
-    override fun getParserTokens(code: String): List<String> {
+    override fun getParserTokens(code: String): List<Int> {
         val lexer = JavaLexer(CharStreams.fromString(code))
+        lexer.removeErrorListeners()
         val tokenStream = CommonTokenStream(lexer)
         val parser = JavaParser(tokenStream)
         parser.removeErrorListeners()
@@ -34,7 +35,7 @@ class AntlrJavaAnalyzer : ICodeAnalyzer {
         return visitor.collectedTokens
             .filter { it !in strategy.extraTokens }
             .filter { it.type !in excludedTypes }
-            .map { it.text }
+            .map {  it.type }
     }
 }
 

@@ -42,6 +42,7 @@ class TokenVisitorJava8 : Java8ParserBaseVisitor<Unit>() {
     }
 
 }
+
 class TokenVisitorJava : JavaParserBaseVisitor<Unit>() {
     val collectedTokens = mutableListOf<Token>()
 
@@ -49,34 +50,24 @@ class TokenVisitorJava : JavaParserBaseVisitor<Unit>() {
         collectedTokens.add(node.symbol)
     }
 
-    // штука, чтобы еррор токены тоже добавлялись
     override fun visitErrorNode(node: ErrorNode) {
-        // Создаем фиктивный токен с пометкой "ERROR"
         val errorToken = CommonToken(Token.INVALID_TYPE).apply {
-            text = "<error token>" // Текст фиктивного токена
-            line = node.symbol.line // Присваиваем строку и позицию ошибки из исходного узла
+            text = "<error token>"
+            line = node.symbol.line
             charPositionInLine = node.symbol.charPositionInLine
             channel = Token.DEFAULT_CHANNEL
         }
-
         collectedTokens.add(errorToken)
     }
 
-    // Для обхода всех дочерних узлов
     override fun visitChildren(node: RuleNode): Unit {
-        if (node is ParserRuleContext) {
-            // Проверка наличия исключений и недостающих токенов
-            if (node.children == null || node.children.isEmpty()) {
-                // Если узел пустой, добавляем фиктивный токен, чтобы указать на недостающее выражение
-                val fakeToken = CommonToken(JavaLexer.IDENTIFIER, "<missing some>")
-                collectedTokens.add(fakeToken)
-            }
+        if (node is ParserRuleContext && (node.children == null || node.children.isEmpty())) {
+            val fakeToken = CommonToken(Token.INVALID_TYPE, "<missing some>")
+            collectedTokens.add(fakeToken)
         }
-        return super.visitChildren(node)
+        super.visitChildren(node)
     }
-
 }
-
 class LoggingErrorStrategy : DefaultErrorStrategy() {
     val extraTokens = mutableListOf<Token>()
 

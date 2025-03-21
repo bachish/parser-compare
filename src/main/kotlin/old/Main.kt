@@ -1,3 +1,5 @@
+package old
+
 fun main() {
     val language = "java"
     val analyzer = OldCodeAnalyzer(language)
