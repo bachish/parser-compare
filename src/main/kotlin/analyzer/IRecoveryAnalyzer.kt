@@ -7,9 +7,10 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.system.exitProcess
 
 // Интерфейс для анализа кода (T - тип токенов)
-interface ICodeAnalyzer<T> {
+interface IRecoveryAnalyzer<T> {
     fun getLexerTokens(code: String): List<T>
     fun getParserTokens(code: String): List<T>
 
@@ -23,7 +24,13 @@ interface ICodeAnalyzer<T> {
 
     fun calculateSimilarity(file: File): Double {
         val code = Files.readString(Paths.get(file.absolutePath))
-        return calculateSimilarity(code)
+        try {
+            return calculateSimilarity(code)
+        } catch (e: Throwable){
+            println("\nCan't process file ${file.absolutePath}")
+            println(e.message)
+            throw e
+        }
     }
 
     fun hollowParse(code: String) {
@@ -66,7 +73,7 @@ object LevenshteinUtils {
 
 
 // Пример реализации для не-ANTLR парсера
-class NewAnalyzer : ICodeAnalyzer<String> {
+class NewAnalyzer : IRecoveryAnalyzer<String> {
     override fun getLexerTokens(code: String): List<String> {
         return code.split(" ").filter { it.isNotBlank() }
     }

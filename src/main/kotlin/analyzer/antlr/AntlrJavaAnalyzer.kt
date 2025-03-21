@@ -1,13 +1,13 @@
 package analyzer.antlr
 
-import analyzer.ICodeAnalyzer
+import analyzer.IRecoveryAnalyzer
 import antlr.java.JavaLexer
 import antlr.java.JavaParser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 
 // Реализация для Java с использованием ANTLR (токены как пара текст-тип)
-class AntlrJavaAnalyzer : ICodeAnalyzer<Int> {
+class AntlrJavaAnalyzer : IRecoveryAnalyzer<Int> {
     override fun getLexerTokens(code: String): List<Int> {
         val lexer = JavaLexer(CharStreams.fromString(code))
         lexer.removeErrorListeners()

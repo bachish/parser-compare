@@ -1,5 +1,5 @@
-import analyzer.ICodeAnalyzer
-import analyzer.antlr.AntlrJavaAnalyzer
+import analyzer.IRecoveryAnalyzer
+import analyzer.treesitter.TreeSitterAnalyzer
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -9,7 +9,7 @@ import me.tongfei.progressbar.ProgressBar
 fun <T> processFiles(
     directoryPath: String,
     outputCsvPath: String,
-    analyzer: ICodeAnalyzer<T>,
+    analyzer: IRecoveryAnalyzer<T>,
     maxFiles: Int = Int.MAX_VALUE,
     append: Boolean = true
 ) {
@@ -67,7 +67,7 @@ fun <T> processFiles(
 
 fun main() {
 
-    val analyzer = AntlrJavaAnalyzer()
+    val analyzer = TreeSitterAnalyzer()
     processFiles(
         directoryPath = "C:\\data\\java_src_files",
         outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_all_scores.csv",

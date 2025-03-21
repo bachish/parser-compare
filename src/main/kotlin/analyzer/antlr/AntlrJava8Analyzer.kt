@@ -1,12 +1,12 @@
 package analyzer.antlr
 
-import analyzer.ICodeAnalyzer
+import analyzer.IRecoveryAnalyzer
 import antlr.java8.Java8Lexer
 import antlr.java8.Java8Parser
 import org.antlr.v4.runtime.*
 
 // Реализация для Java8 с использованием ANTLR
-class AntlrJava8Analyzer : ICodeAnalyzer<Int> {
+class AntlrJava8Analyzer : IRecoveryAnalyzer<Int> {
     override fun getLexerTokens(code: String): List<Int> {
         val lexer = Java8Lexer(CharStreams.fromString(code))
         lexer.removeErrorListeners()

@@ -1,4 +1,4 @@
-package jflexLexer;
+package jflex;
 /*
  * Copyright (C) 1998-2018  Gerwin Klein <lsf@jflex.de>
  * SPDX-License-Identifier: GPL-2.0-only
@@ -20,7 +20,7 @@ package jflexLexer;
 %%
 
 %public
-%class Scanner
+%class JavaScanner
 
 %unicode
 
@@ -251,8 +251,8 @@ SingleCharacter = [^\r\n\'\\]
   \\[0-3]?{OctDigit}?{OctDigit}  {  }
 
   /* error cases */
-  \\.                            { throw new RuntimeException("Illegal escape sequence \""+yytext()+"\""); }
-  {LineTerminator}               { throw new RuntimeException("Unterminated string at end of line"); }
+  \\.                            {  }
+  {LineTerminator}               {  }
 }
 
 <CHARLITERAL> {
@@ -267,12 +267,14 @@ SingleCharacter = [^\r\n\'\\]
   "\\\""\'                       { yybegin(YYINITIAL); return JavaToken.CHARACTER_LITERAL;}
   "\\'"\'                        { yybegin(YYINITIAL); return JavaToken.CHARACTER_LITERAL;}
   "\\\\"\'                       { yybegin(YYINITIAL); return JavaToken.CHARACTER_LITERAL; }
+    "\\u"\'                          { yybegin(YYINITIAL); return JavaToken.CHARACTER_LITERAL; }
+    "\\u000C"\'                   {yybegin(YYINITIAL); return JavaToken.CHARACTER_LITERAL;}
   \\[0-3]?{OctDigit}?{OctDigit}\' { yybegin(YYINITIAL);
 			                            return JavaToken.CHARACTER_LITERAL; }
 
   /* error cases */
-  \\.                            { throw new RuntimeException("Illegal escape sequence \""+yytext()+"\""); }
-  {LineTerminator}               { throw new RuntimeException("Unterminated character literal at end of line"); }
+  \\.                            {  }
+  {LineTerminator}               {  }
 }
 
 /* error fallback */
