@@ -1,16 +1,13 @@
-package old
 
+import analyzer.treesitter.TreeSitterAnalyzer
 import java.io.File
 
-//import CodeAnalyzer
 fun main(args: Array<String>) {
-    val language = "java8"
-    val analyzer = OldCodeAnalyzer(language)
-
+    val analyzer = TreeSitterAnalyzer()
     val filePath = args[0]
 //    val filePath = "C:\\data\\java_src_files\\49030395_1874025707"
     val file = File(filePath)
-    val s = analyzer.parseFile(file)
+    val s = analyzer.hollowParse(file.readText())
 }
 
 //fun main() {

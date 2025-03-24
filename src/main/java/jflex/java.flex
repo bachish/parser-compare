@@ -267,8 +267,7 @@ SingleCharacter = [^\r\n\'\\]
   "\\\""\'                       { yybegin(YYINITIAL); return JavaToken.CHARACTER_LITERAL;}
   "\\'"\'                        { yybegin(YYINITIAL); return JavaToken.CHARACTER_LITERAL;}
   "\\\\"\'                       { yybegin(YYINITIAL); return JavaToken.CHARACTER_LITERAL; }
-    "\\u"\'                          { yybegin(YYINITIAL); return JavaToken.CHARACTER_LITERAL; }
-    "\\u000C"\'                   {yybegin(YYINITIAL); return JavaToken.CHARACTER_LITERAL;}
+"\\u"{HexDigit}{HexDigit}{HexDigit}{HexDigit}\' {yybegin(YYINITIAL); return JavaToken.CHARACTER_LITERAL;}
   \\[0-3]?{OctDigit}?{OctDigit}\' { yybegin(YYINITIAL);
 			                            return JavaToken.CHARACTER_LITERAL; }
 
@@ -278,6 +277,5 @@ SingleCharacter = [^\r\n\'\\]
 }
 
 /* error fallback */
-[^]                              { throw new RuntimeException("Illegal character \""+yytext()+
-                                                              "\" at line "+yyline+", column "+yycolumn); }
+[^]                              {  }
 <<EOF>>                          { return JavaToken.EOF; }

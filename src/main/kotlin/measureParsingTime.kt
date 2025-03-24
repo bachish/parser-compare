@@ -6,12 +6,14 @@ import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import kotlin.system.measureNanoTime
 import me.tongfei.progressbar.ProgressBar
+import analyzer.IRecoveryAnalyzer
+import analyzer.treesitter.TreeSitterAnalyzer
 
-fun measureParsingTime(
+fun <T> measureParsingTime(
     directoryPath: String,
     outputCsvPath: String,
-    analyzer: OldCodeAnalyzer,
-    warmupFilesCount: Int = 10,
+    analyzer: IRecoveryAnalyzer<T>,
+    warmupFilesCount: Int = 100,
     maxFiles: Int = Int.MAX_VALUE,
     append: Boolean = true
 ) {
@@ -81,4 +83,17 @@ fun measureParsingTime(
     }
 
     println("Parsing time measurement complete. Results written to $outputCsvPath")
+}
+
+// Пример использования
+fun main() {
+    val analyzer = TreeSitterAnalyzer()
+
+    measureParsingTime(
+        directoryPath = "C:\\data\\java_src_files",
+        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_measureParsingTime.csv",
+        analyzer = analyzer,
+//        maxFiles = 50,
+        append = true
+    )
 }

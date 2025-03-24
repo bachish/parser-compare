@@ -2,6 +2,7 @@
 package analyzer.treesitter
 
 import analyzer.IRecoveryAnalyzer
+import analyzer.antlr.AntlrJavaAnalyzer
 import jflex.JavaScanner
 import jflex.JavaToken
 import jflex.TreeSitterLexer
@@ -40,6 +41,34 @@ class TreeSitterAnalyzer : IRecoveryAnalyzer<Int> {
         parser.setLanguage(TreeSitterJava())
         val tree = parser.parseString(null, code)
         val leaves = mutableListOf<String>()
+
+
+//        // На файле с xml разметкой для логитека рекурсия падает со стак овервлоу((((
+//        // поэтому переделываем без рекурсии
+//        fun traverse(node: TSNode) {
+//            val stack = ArrayDeque<TSNode>()
+//            stack.addFirst(node)
+//
+//            while (stack.isNotEmpty()) {
+//                val current = stack.removeFirst()
+//
+//                if (current.childCount == 0) {
+//                    if (current.parent.isError) {
+//                        leaves.add("error")
+//                    } else {
+//                        leaves.add(current.type)
+//                    }
+//                }
+//
+//                // Добавляем дочерние узлы в обратном порядке,
+//                // чтобы обрабатывать их в прямом порядке
+//                for (i in current.childCount - 1 downTo 0) {
+//                    stack.addFirst(current.getChild(i)!!)
+//                }
+//            }
+//        }
+//
+
         fun traverse(node: TSNode) {
             if (node.childCount == 0) {
                 if (node.parent.isError) {
@@ -53,13 +82,24 @@ class TreeSitterAnalyzer : IRecoveryAnalyzer<Int> {
                 traverse(node.getChild(i)!!)
             }
         }
+
+
+
+
         traverse(tree.rootNode)
         return leaves.joinToString(" ")
+    }
+
+    override fun hollowParse(code: String) {
+        val parser = TSParser()
+        parser.setLanguage(TreeSitterJava())
+        val tree = parser.parseString(null, code)
     }
 }
 // Пример использования
 fun main() {
     val analyzer = TreeSitterAnalyzer()
+//    val analyzer = AntlrJavaAnalyzer()
 //    val code = """
 //        @interface MyAnnotation {}
 //        public class Test {
@@ -78,11 +118,18 @@ int main(){
 int main(){}}}
    """
 
-    val code = "int main(){z;}"
+    val code = """
+public class Test {
+    public static void main(String[] args) {{{{{
+        System.out.println("Hello World!");
+    }
+}
+"""
 
     val lexerTokens = analyzer.getLexerTokens(code)
     val parserTokens = analyzer.getParserTokens(code)
 
+    println("code: $code")
     println("Lexer Tokens (JFlex): $lexerTokens")
     println("Parser Tokens (Tree-sitter): $parserTokens")
     println("Similarity: ${analyzer.calculateSimilarity(code)}")

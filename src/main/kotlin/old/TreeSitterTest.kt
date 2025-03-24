@@ -1,6 +1,7 @@
 package old
 import org.treesitter.TSParser
 import org.treesitter.TreeSitterJava
+import java.io.File
 
 // not a statement?
 val missingId = """public class Simple {
@@ -17,7 +18,20 @@ fun main() {
     val parser = TSParser()
     parser.setLanguage(TreeSitterJava())
 
-    val code = """int main(){z;}""".trimIndent()
+////    val code = """int main(){z;}""".trimIndent()
+    val code = """
+        class phs
+        {
+           rrrrrrrrrrrr (rrr[ ]) 
+         {
+             hyfhhhhh(h[]);
+            }
+        }
+        
+        
+    """.trimIndent()
+//    val filePath = "C:\\data\\java_src_files\\8821304_307656826" // Укажите путь к файлу
+//    val code = File(filePath).readText()
 
     val tree = parser.parseString(null, code)
     val dotString = captureDotGraph(tree)

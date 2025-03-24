@@ -27,7 +27,7 @@ interface IRecoveryAnalyzer<T> {
         try {
             return calculateSimilarity(code)
         } catch (e: Throwable){
-            println("\nCan't process file ${file.absolutePath}")
+            println("\nCan't process file \n${file.absolutePath}")
             println(e.message)
             throw e
         }

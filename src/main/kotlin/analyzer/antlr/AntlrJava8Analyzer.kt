@@ -20,6 +20,7 @@ class AntlrJava8Analyzer : IRecoveryAnalyzer<Int> {
 
     override fun getParserTokens(code: String): List<Int> {
         val lexer = Java8Lexer(CharStreams.fromString(code))
+        lexer.removeErrorListeners()
         val tokenStream = CommonTokenStream(lexer)
         val parser = Java8Parser(tokenStream)
         parser.removeErrorListeners()

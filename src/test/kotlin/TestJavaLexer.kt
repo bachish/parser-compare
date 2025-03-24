@@ -20,4 +20,9 @@ class TestJavaLexer {
             }
         """.trimIndent())
     }
+
+    @Test
+    fun testUnicode(){
+//        println('\u')
+    }
 }
