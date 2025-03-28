@@ -2,7 +2,6 @@
 package analyzer.treesitter
 
 import analyzer.IRecoveryAnalyzer
-import analyzer.antlr.AntlrJavaAnalyzer
 import jflex.JavaScanner
 import jflex.JavaToken
 import jflex.TreeSitterLexer
@@ -82,9 +81,6 @@ class TreeSitterAnalyzer : IRecoveryAnalyzer<Int> {
                 traverse(node.getChild(i)!!)
             }
         }
-
-
-
 
         traverse(tree.rootNode)
         return leaves.joinToString(" ")

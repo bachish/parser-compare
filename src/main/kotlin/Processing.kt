@@ -1,5 +1,6 @@
 import analyzer.IRecoveryAnalyzer
 import analyzer.antlr.AntlrJava8Analyzer
+import analyzer.jdt.JDTAnalyzer
 import analyzer.treesitter.TreeSitterAnalyzer
 import java.io.File
 import java.nio.file.Files
@@ -68,7 +69,7 @@ fun <T> processFiles(
 
 fun main() {
 
-    val analyzer = AntlrJava8Analyzer()
+    val analyzer = JDTAnalyzer()
     processFiles(
         directoryPath = "C:\\data\\java_src_files",
         outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_all_scores.csv",
