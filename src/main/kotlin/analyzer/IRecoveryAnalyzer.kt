@@ -33,10 +33,15 @@ interface IRecoveryAnalyzer<T> {
         }
     }
 
-    fun hollowParse(code: String) {
-        getLexerTokens(code)
-        getParserTokens(code)
-    }
+//    fun hollowParse(code: String) {
+//        getLexerTokens(code)
+//        getParserTokens(code)
+//    }
+//    fun hollowParse(file: File) = hollowParse(file.readText())
+    // Возвращает время парсинга в наносекундах, по умолчанию 0
+    fun hollowParse(file: File): Long = 0L
+    fun hollowParse(code: String): Long = 0L
+
 }
 
 // Утилита для вычисления расстояния Левенштейна

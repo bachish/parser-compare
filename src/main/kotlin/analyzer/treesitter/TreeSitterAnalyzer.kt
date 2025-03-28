@@ -90,10 +90,12 @@ class TreeSitterAnalyzer : IRecoveryAnalyzer<Int> {
         return leaves.joinToString(" ")
     }
 
-    override fun hollowParse(code: String) {
+    override fun hollowParse(code: String): Long {
         val parser = TSParser()
         parser.setLanguage(TreeSitterJava())
         val tree = parser.parseString(null, code)
+        //todo НОРМАЛЬНО ПОСЧИТАТЬ МОЛЮ
+        return 0L
     }
 }
 // Пример использования
