@@ -7,6 +7,8 @@ import kotlin.system.measureNanoTime
 import me.tongfei.progressbar.ProgressBar
 import analyzer.IRecoveryAnalyzer
 import analyzer.javac.JavacAnalyzer
+import analyzer.jdt.JDTAnalyzer
+import analyzer.treesitter.TreeSitterAnalyzer
 
 class ParsingTimeMeasurer<T>(
     private val directoryPath: String,
@@ -62,10 +64,10 @@ class ParsingTimeMeasurer<T>(
 
 // Пример использования
 fun main() {
-    val analyzer = JavacAnalyzer()
+    val analyzer = TreeSitterAnalyzer()
     val measurer = ParsingTimeMeasurer(
-        directoryPath = "C:\\data\\java_src_files_java",
-        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_measureParsingTime3.csv",
+        directoryPath = "C:\\data\\java_src_files",
+        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_measureParsingTime4.csv",
         analyzer = analyzer,
         warmupFilesCount = 100,
 //        maxFiles = 50, // Ограничим для теста, можно убрать

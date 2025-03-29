@@ -8,7 +8,9 @@ import org.eclipse.jdt.core.dom.AST
 import org.eclipse.jdt.core.dom.ASTParser
 import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jdt.internal.core.dom.NaiveASTFlattener
+import java.io.File
 import java.io.StringReader
+import kotlin.system.measureNanoTime
 
 class JDTAnalyzer : IRecoveryAnalyzer<Int> {
     // 1. Токены от лексера (JFlex Scanner) для исходного кода
@@ -25,7 +27,7 @@ class JDTAnalyzer : IRecoveryAnalyzer<Int> {
     // 2. Токены от парсера (JDT) через восстановленный код
     override fun getParserTokens(code: String): List<Int> {
         // Парсим код с помощью JDT
-        val parser = ASTParser.newParser(AST.JLS8)
+        val parser = ASTParser.newParser(AST.JLS21)
         parser.setSource(code.toCharArray())
         parser.setKind(ASTParser.K_COMPILATION_UNIT)
         val cu = parser.createAST(null) as CompilationUnit
@@ -47,18 +49,28 @@ class JDTAnalyzer : IRecoveryAnalyzer<Int> {
         return tokens
     }
 
+    override fun hollowParse(code: String): Long {
+        val parser = ASTParser.newParser(AST.JLS21)
+        parser.setSource(code.toCharArray())
+        parser.setKind(ASTParser.K_COMPILATION_UNIT)
+        return measureNanoTime {
+            val cu = parser.createAST(null) as CompilationUnit
+        }
+    }
 }
 
 // Пример использования
 fun main() {
     val analyzer = JDTAnalyzer()
-    val code = """
-import java.util.Random;
-import java.util.Scanner;
- 
-public class Ejercicio {
- 
-    """.trimIndent()
+//    val code = """
+//import java.util.Random;
+//import java.util.Scanner;
+//
+//public class Ejercicio {
+//
+//    """.trimIndent()
+
+    val code = File("C:\\data\\java_src_files\\11529458_434215191").readText()
 
     val lexerTokens = analyzer.getLexerTokens(code)
     val parserTokens = analyzer.getParserTokens(code)

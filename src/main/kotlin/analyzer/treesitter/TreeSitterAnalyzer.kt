@@ -9,6 +9,7 @@ import org.treesitter.TSNode
 import org.treesitter.TSParser
 import org.treesitter.TreeSitterJava
 import java.io.StringReader
+import kotlin.system.measureNanoTime
 
 class TreeSitterAnalyzer : IRecoveryAnalyzer<Int> {
     // Токены от лексера (JFlex Scanner)
@@ -89,9 +90,10 @@ class TreeSitterAnalyzer : IRecoveryAnalyzer<Int> {
     override fun hollowParse(code: String): Long {
         val parser = TSParser()
         parser.setLanguage(TreeSitterJava())
-        val tree = parser.parseString(null, code)
-        //todo НОРМАЛЬНО ПОСЧИТАТЬ МОЛЮ
-        return 0L
+        return measureNanoTime {
+            val tree = parser.parseString(null, code)
+            tree.rootNode
+        }
     }
 }
 // Пример использования
