@@ -43,8 +43,6 @@ class AntlrJava8Analyzer : IRecoveryAnalyzer<Int> {
         val tokenStream = CommonTokenStream(lexer)
         val parser = Java8Parser(tokenStream)
         parser.removeErrorListeners()
-        val strategy = LoggingErrorStrategy()
-        parser.errorHandler = strategy
         return measureNanoTime {
             val tree = parser.compilationUnit()
         }
