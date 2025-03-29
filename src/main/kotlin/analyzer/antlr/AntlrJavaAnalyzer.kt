@@ -42,10 +42,10 @@ class AntlrJavaAnalyzer : IRecoveryAnalyzer<Int> {
     override fun measureParse(code: String): Long {
         val lexer = JavaLexer(CharStreams.fromString(code))
         lexer.removeErrorListeners()
-        val tokenStream = CommonTokenStream(lexer)
-        val parser = JavaParser(tokenStream)
-        parser.removeErrorListeners()
         return measureNanoTime {
+            val tokenStream = CommonTokenStream(lexer)
+            val parser = JavaParser(tokenStream)
+            parser.removeErrorListeners()
             val tree = parser.compilationUnit()
         }
     }

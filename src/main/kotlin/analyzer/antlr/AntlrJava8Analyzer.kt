@@ -40,10 +40,10 @@ class AntlrJava8Analyzer : IRecoveryAnalyzer<Int> {
     override fun measureParse(code: String): Long {
         val lexer = Java8Lexer(CharStreams.fromString(code))
         lexer.removeErrorListeners()
-        val tokenStream = CommonTokenStream(lexer)
-        val parser = Java8Parser(tokenStream)
-        parser.removeErrorListeners()
         return measureNanoTime {
+            val tokenStream = CommonTokenStream(lexer)
+            val parser = Java8Parser(tokenStream)
+            parser.removeErrorListeners()
             val tree = parser.compilationUnit()
         }
     }
