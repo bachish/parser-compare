@@ -49,7 +49,7 @@ class JDTAnalyzer : IRecoveryAnalyzer<Int> {
         return tokens
     }
 
-    override fun hollowParse(code: String): Long {
+    override fun measureParse(code: String): Long {
         val parser = ASTParser.newParser(AST.JLS21)
         parser.setSource(code.toCharArray())
         parser.setKind(ASTParser.K_COMPILATION_UNIT)

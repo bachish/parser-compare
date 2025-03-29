@@ -19,7 +19,7 @@ class JavacAnalyzer : IRecoveryAnalyzer<String> {
         TODO("Not yet implemented")
     }
 
-    override fun hollowParse(file: File): Long {
+    override fun measureParse(file: File): Long {
         val compiler = ToolProvider.getSystemJavaCompiler()
         val diagnostics = DiagnosticCollector<JavaFileObject>()
         val fileObject = JavaSourceFromFile(file)

@@ -7,7 +7,7 @@ fun main(args: Array<String>) {
     val filePath = args[0]
 //    val filePath = "C:\\data\\java_src_files\\49030395_1874025707"
     val file = File(filePath)
-    val s = analyzer.hollowParse(file.readText())
+    val s = analyzer.measureParse(file.readText())
 }
 
 //fun main() {

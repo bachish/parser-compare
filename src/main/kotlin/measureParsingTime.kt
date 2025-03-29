@@ -7,8 +7,6 @@ import kotlin.system.measureNanoTime
 import me.tongfei.progressbar.ProgressBar
 import analyzer.IRecoveryAnalyzer
 import analyzer.javac.JavacAnalyzer
-import analyzer.jdt.JDTAnalyzer
-import analyzer.treesitter.TreeSitterAnalyzer
 
 class ParsingTimeMeasurer<T>(
     private val directoryPath: String,
@@ -22,17 +20,20 @@ class ParsingTimeMeasurer<T>(
         val files = getFiles()
         warmupJvm(files)
 
+        val file = File(outputCsvPath)
+        val isNewFile = !file.exists() || file.length() == 0L
+
         val writer = Files.newBufferedWriter(
             Paths.get(outputCsvPath),
-            if (append && File(outputCsvPath).exists()) StandardOpenOption.APPEND else StandardOpenOption.CREATE
+            if (append && file.exists()) StandardOpenOption.APPEND else StandardOpenOption.CREATE
         ).apply {
-            if (!append || !File(outputCsvPath).exists()) append("fileName,parsingTimeNanos\n")
+            if (isNewFile) append("fileName,parsingTimeNanos\n")
         }
 
         ProgressBar("Measuring Parsing Time", files.size.toLong()).use { pb ->
             writer.use { w ->
                 files.forEach { file ->
-                    val time = measureNanoTime { analyzer.hollowParse(file) }
+                    val time = measureNanoTime { analyzer.measureParse(file) }
                     w.append("${file.name},$time\n").flush()
                     pb.step()
                 }
@@ -57,17 +58,17 @@ class ParsingTimeMeasurer<T>(
 
     private fun warmupJvm(files: List<File>) {
         println("Starting JVM warmup...")
-        files.shuffled().take(warmupFilesCount).forEach { analyzer.hollowParse(it) }
+        files.shuffled().take(warmupFilesCount).forEach { analyzer.measureParse(it) }
         println("JVM warmup complete.")
     }
 }
 
 // Пример использования
 fun main() {
-    val analyzer = TreeSitterAnalyzer()
+    val analyzer = JavacAnalyzer()
     val measurer = ParsingTimeMeasurer(
-        directoryPath = "C:\\data\\java_src_files",
-        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_measureParsingTime4.csv",
+        directoryPath = "C:\\data\\java_src_files_java", // строго важно для жавака _java чтобы были правильные штуки эти после точки не помнб как их там расширение точно
+        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_measureParsingTime.csv",
         analyzer = analyzer,
         warmupFilesCount = 100,
 //        maxFiles = 50, // Ограничим для теста, можно убрать

@@ -7,7 +7,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.system.exitProcess
 
 // Интерфейс для анализа кода (T - тип токенов)
 interface IRecoveryAnalyzer<T> {
@@ -39,8 +38,8 @@ interface IRecoveryAnalyzer<T> {
 //    }
 //    fun hollowParse(file: File) = hollowParse(file.readText())
     // Возвращает время парсинга в наносекундах, по умолчанию 0
-    fun hollowParse(file: File) = hollowParse(file.readText())
-    fun hollowParse(code: String): Long = 0L
+    fun measureParse(file: File) = measureParse(file.readText())
+    fun measureParse(code: String): Long = 0L
 
 }
 

@@ -87,7 +87,7 @@ class TreeSitterAnalyzer : IRecoveryAnalyzer<Int> {
         return leaves.joinToString(" ")
     }
 
-    override fun hollowParse(code: String): Long {
+    override fun measureParse(code: String): Long {
         val parser = TSParser()
         parser.setLanguage(TreeSitterJava())
         return measureNanoTime {
