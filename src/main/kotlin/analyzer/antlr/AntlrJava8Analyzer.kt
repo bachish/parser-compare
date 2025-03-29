@@ -4,6 +4,7 @@ import analyzer.IRecoveryAnalyzer
 import antlr.java8.Java8Lexer
 import antlr.java8.Java8Parser
 import org.antlr.v4.runtime.*
+import kotlin.system.measureNanoTime
 
 // Реализация для Java8 с использованием ANTLR
 class AntlrJava8Analyzer : IRecoveryAnalyzer<Int> {
@@ -35,5 +36,17 @@ class AntlrJava8Analyzer : IRecoveryAnalyzer<Int> {
             .filter { it !in strategy.extraTokens }
             .filter { it.type !in excludedTypes }
             .map { it.type }
+    }
+    override fun measureParse(code: String): Long {
+        val lexer = Java8Lexer(CharStreams.fromString(code))
+        lexer.removeErrorListeners()
+        val tokenStream = CommonTokenStream(lexer)
+        val parser = Java8Parser(tokenStream)
+        parser.removeErrorListeners()
+        val strategy = LoggingErrorStrategy()
+        parser.errorHandler = strategy
+        return measureNanoTime {
+            val tree = parser.compilationUnit()
+        }
     }
 }
