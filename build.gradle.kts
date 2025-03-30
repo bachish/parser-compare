@@ -1,3 +1,5 @@
+import java.util.*
+
 plugins {
     kotlin("jvm") version "2.0.20"
     application
@@ -54,3 +56,36 @@ tasks.withType<Jar> {
 }
 
 
+tasks.register("runDagster") {
+    group = "dagster"
+    description = "Запускает Dagster webserver и daemon"
+
+    doLast {
+        val projectDir = project.projectDir.absolutePath.replace("\\", "/")
+        val venvActivate = "$projectDir/dagster/venv/Scripts/activate"
+        val pipelineFile = "$projectDir/dagster/pipelines/file_pipeline.py"
+        val dagsterHome = "C:/Users/huawei/IdeaProjects/antlr_test_2/dagster/dagster_home"
+        File("$dagsterHome/history").mkdirs()
+
+        val dagsterWebserver = ProcessBuilder(
+            "cmd", "/c", "start", "cmd", "/k",
+            "call \"$venvActivate\" && dagster-webserver -f \"$pipelineFile\" -p 3001"
+        )
+            .directory(File(projectDir))
+            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+            .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .start()
+
+        val dagsterDaemon = ProcessBuilder(
+            "cmd", "/c", "start", "cmd", "/k",
+            "call \"$venvActivate\" && dagster-daemon run -w \"$projectDir/dagster/workspace.yaml\""
+        )
+            .directory(File(projectDir))
+            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+            .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .start()
+
+        dagsterWebserver.waitFor()
+        dagsterDaemon.waitFor()
+    }
+}

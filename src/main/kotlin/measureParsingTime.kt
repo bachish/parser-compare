@@ -6,6 +6,7 @@ import java.nio.file.StandardOpenOption
 import kotlin.system.measureNanoTime
 import me.tongfei.progressbar.ProgressBar
 import analyzer.IRecoveryAnalyzer
+import analyzer.antlr.AntlrJava8Analyzer
 import analyzer.javac.JavacAnalyzer
 
 class ParsingTimeMeasurer<T>(
@@ -65,10 +66,12 @@ class ParsingTimeMeasurer<T>(
 
 // Пример использования
 fun main() {
-    val analyzer = JavacAnalyzer()
+    val analyzer = AntlrJava8Analyzer()
     val measurer = ParsingTimeMeasurer(
-        directoryPath = "C:\\data\\java_src_files_java", // строго важно для жавака _java чтобы были правильные штуки эти после точки не помнб как их там расширение точно
-        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_measureParsingTime.csv",
+//        directoryPath = "C:\\data\\java_src_files_java", // строго важно для жавака _java чтобы были правильные штуки эти после точки не помнб как их там расширение точно
+//        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_measureParsingTime.csv",
+        directoryPath = "C:\\data\\junit",
+        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_measureParsingTime_junit.csv",
         analyzer = analyzer,
         warmupFilesCount = 100,
 //        maxFiles = 50, // Ограничим для теста, можно убрать
