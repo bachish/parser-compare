@@ -3,9 +3,7 @@ import java.util.*
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
-//tasks.jar {
-//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-//}
+
 
 
 plugins {
@@ -55,13 +53,16 @@ tasks.withType<Jar> {
     manifest {
         attributes["Main-Class"] = "MeasureParsingTimeMainKt"  // Указание на главный класс
     }
+    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
 
     exclude("META-INF/*.SF")
     exclude("META-INF/*.DSA")
     exclude("META-INF/*.RSA")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
 
 }
+
 
 
 tasks.register("runDagster") {

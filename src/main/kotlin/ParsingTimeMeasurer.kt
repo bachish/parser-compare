@@ -6,10 +6,6 @@ import java.nio.file.StandardOpenOption
 import kotlin.system.measureNanoTime
 import me.tongfei.progressbar.ProgressBar
 import analyzer.IRecoveryAnalyzer
-import analyzer.antlr.AntlrJava8Analyzer
-import analyzer.antlr.AntlrJavaAnalyzer
-import analyzer.javac.JavacAnalyzer
-import analyzer.jdt.JDTAnalyzer
 import analyzer.treesitter.TreeSitterAnalyzer
 
 class ParsingTimeMeasurer<T>(
