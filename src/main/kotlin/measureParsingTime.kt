@@ -7,7 +7,10 @@ import kotlin.system.measureNanoTime
 import me.tongfei.progressbar.ProgressBar
 import analyzer.IRecoveryAnalyzer
 import analyzer.antlr.AntlrJava8Analyzer
+import analyzer.antlr.AntlrJavaAnalyzer
 import analyzer.javac.JavacAnalyzer
+import analyzer.jdt.JDTAnalyzer
+import analyzer.treesitter.TreeSitterAnalyzer
 
 class ParsingTimeMeasurer<T>(
     private val directoryPath: String,
@@ -66,7 +69,11 @@ class ParsingTimeMeasurer<T>(
 
 // Пример использования
 fun main() {
-    val analyzer = AntlrJava8Analyzer()
+//    val analyzer = AntlrJava8Analyzer()
+//    val analyzer = AntlrJavaAnalyzer()
+//    val analyzer = JavacAnalyzer()
+//    val analyzer = JDTAnalyzer()
+    val analyzer = TreeSitterAnalyzer()
     val measurer = ParsingTimeMeasurer(
 //        directoryPath = "C:\\data\\java_src_files_java", // строго важно для жавака _java чтобы были правильные штуки эти после точки не помнб как их там расширение точно
 //        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_measureParsingTime.csv",

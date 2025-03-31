@@ -1,44 +1,67 @@
 import os
-import pandas as pd
-from dagster import job, op
+import shutil
+from dagster import asset, OpExecutionContext, Config
 
-# Шаг 1: Считываем информацию о файлах в папке
+# Базовая директория для хранения датасетов
+DATASETS_DIR = "C:/Users/huawei/IdeaProjects/antlr_test_2/dagster/datasets"
 
+# Класс для конфигурации актива
+class DatasetConfig(Config):
+    source_folder: str  # Путь к папке с исходными файлами
+    dataset_name: str   # Имя датасета
 
-@op
-def get_file_info() -> list:
-    folder_path = "input_folder"  # Укажи путь к своей папке
-    file_info = []
+def load_dataset(context: OpExecutionContext, config: DatasetConfig) -> str:
+    """
+    Загружает файлы из source_folder в datasets/<dataset_name>.
+    Возвращает путь к папке датасета.
+    """
+    source_folder = config.source_folder
+    dataset_name = config.dataset_name
 
-    # Проходим по всем файлам в папке
-    for filename in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, filename)
-        if os.path.isfile(file_path):  # Проверяем, что это файл, а не папка
-            size = os.path.getsize(file_path)  # Размер в байтах
-            file_info.append({"filename": filename, "size": size})
+    # Формируем путь для нового датасета
+    dataset_path = os.path.join(DATASETS_DIR, dataset_name)
 
-    return file_info
+    # Удаляем старую папку, если она существует (опционально)
+    if os.path.exists(dataset_path):
+        shutil.rmtree(dataset_path)
 
+    # Создаем новую папку
+    os.makedirs(dataset_path, exist_ok=True)
 
-# Шаг 2: Сохраняем информацию в CSV
+    # Копируем все файлы из исходной папки
+    file_count = 0
+    for root, _, files in os.walk(source_folder):
+        for file in files:
+            src_path = os.path.join(root, file)
+            dst_path = os.path.join(dataset_path, file)
+            shutil.copy2(src_path, dst_path)  # copy2 сохраняет метаданные
+            file_count += 1
 
+    context.log.info(f"Copied {file_count} files from {source_folder} to {dataset_path}")
+    return dataset_path
 
-@op
-def save_to_csv(file_info: list) -> None:
-    output_path = "file_info.csv"
-    df = pd.DataFrame(file_info)  # Преобразуем список в DataFrame
-    df.to_csv(output_path, index=False)  # Сохраняем в CSV
-    print(f"CSV file saved at: {output_path}")
+@asset
+def dataset(context: OpExecutionContext, config: DatasetConfig) -> str:
+    """
+    Актив, представляющий датасет.
+    Конфигурация передается через config.
+    """
+    return load_dataset(context, config)
 
-# Определяем пайплайн
-
-
-@job
-def file_info_pipeline():
-    file_info = get_file_info()
-    save_to_csv(file_info)
-
-
-# Для запуска через Dagit нужно указать, как запускать пайплайн
+# Пример запуска для тестирования
 if __name__ == "__main__":
-    result = file_info_pipeline.execute_in_process()
+    from dagster import materialize
+
+    materialize(
+        [dataset],
+        run_config={
+            "ops": {
+                "dataset": {
+                    "config": {
+                        "source_folder": "C:\\data\\junit",
+                        "dataset_name": "junit"
+                    }
+                }
+            }
+        }
+    )

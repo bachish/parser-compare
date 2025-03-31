@@ -1,5 +1,13 @@
 import java.util.*
 
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+//tasks.jar {
+//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//}
+
+
 plugins {
     kotlin("jvm") version "2.0.20"
     application
@@ -40,19 +48,19 @@ sourceSets {
 }
 
 application {
-    mainClass.set("RunnerKt")
+    mainClass.set("MeasureParsingTimeMainKt")
 }
 
 tasks.withType<Jar> {
     manifest {
-        attributes["Main-Class"] = "RunnerKt"  // Указание на главный класс
+        attributes["Main-Class"] = "MeasureParsingTimeMainKt"  // Указание на главный класс
     }
 
-    // Собираем все зависимости в один JAR (fat jar)
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
+    exclude("META-INF/*.SF")
+    exclude("META-INF/*.DSA")
+    exclude("META-INF/*.RSA")
 
-    // Добавляем содержимое исходных файлов
-    from(sourceSets.main.get().output)
+
 }
 
 
