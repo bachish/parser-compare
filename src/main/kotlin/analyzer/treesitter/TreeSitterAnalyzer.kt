@@ -11,7 +11,7 @@ import org.treesitter.TreeSitterJava
 import java.io.StringReader
 import kotlin.system.measureNanoTime
 
-class TreeSitterAnalyzer : IRecoveryAnalyzer<Int> {
+class TreeSitterAnalyzer() : IRecoveryAnalyzer<Int> {
     // Токены от лексера (JFlex Scanner)
     override fun getLexerTokens(code: String): List<Int> {
         val scanner = JavaScanner(StringReader(code))
@@ -86,13 +86,17 @@ class TreeSitterAnalyzer : IRecoveryAnalyzer<Int> {
         traverse(tree.rootNode)
         return leaves.joinToString(" ")
     }
+    var parser:TSParser = TSParser()
+    var sink:Int = 0
+
+    init {
+        parser.setLanguage(TreeSitterJava())
+    }
 
     override fun measureParse(code: String): Long {
-        val parser = TSParser()
-        parser.setLanguage(TreeSitterJava())
         return measureNanoTime {
             val tree = parser.parseString(null, code)
-            tree.rootNode
+            sink += tree.hashCode() % 10
         }
     }
 }

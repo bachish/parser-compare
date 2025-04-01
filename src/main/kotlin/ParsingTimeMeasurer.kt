@@ -33,15 +33,18 @@ class ParsingTimeMeasurer<T>(
         ProgressBar("Measuring Parsing Time", files.size.toLong()).use { pb ->
             writer.use { w ->
                 files.forEach { file ->
-                    val time = measureNanoTime { analyzer.measureParse(file) }
-                    w.append("${file.name},$time\n").flush()
+                    val times = List(40) {
+                        System.gc()
+                        analyzer.measureParse(file)
+                    }
+                    val timesString = times.joinToString(",")
+                    w.append("${file.name},$timesString\n").flush()
                     pb.step()
                 }
             }
         }
         println("Results written to $outputCsvPath")
     }
-
     private fun getFiles(): List<File> {
         val startFile = if (append) File(outputCsvPath).takeIf { it.exists() }?.readLines()?.lastOrNull()?.split(",")?.firstOrNull() else null
         return File(directoryPath).listFiles()
@@ -74,7 +77,7 @@ fun main() {
 //        directoryPath = "C:\\data\\java_src_files_java", // строго важно для жавака _java чтобы были правильные штуки эти после точки не помнб как их там расширение точно
 //        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_measureParsingTime.csv",
         directoryPath = "C:\\data\\junit",
-        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_measureParsingTime_junit.csv",
+        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_measureParsingTime_junit111.csv",
         analyzer = analyzer,
         warmupFilesCount = 100,
 //        maxFiles = 50, // Ограничим для теста, можно убрать
