@@ -69,7 +69,7 @@ fun <T> processFiles(
 
 fun main() {
 
-    val analyzer = JDTAnalyzer()
+    val analyzer = TreeSitterAnalyzer()
     processFiles(
         directoryPath = "C:\\data\\java_src_files",
         outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_all_scores.csv",

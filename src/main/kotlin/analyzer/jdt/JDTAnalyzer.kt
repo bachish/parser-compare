@@ -62,15 +62,9 @@ class JDTAnalyzer : IRecoveryAnalyzer<Int> {
 // Пример использования
 fun main() {
     val analyzer = JDTAnalyzer()
-//    val code = """
-//import java.util.Random;
-//import java.util.Scanner;
-//
-//public class Ejercicio {
-//
-//    """.trimIndent()
+    val code = """class cat {""".trimIndent()
 
-    val code = File("C:\\data\\java_src_files\\11529458_434215191").readText()
+//    val code = File("C:\\data\\java_src_files\\11529458_434215191").readText()
 
     val lexerTokens = analyzer.getLexerTokens(code)
     val parserTokens = analyzer.getParserTokens(code)

@@ -45,45 +45,81 @@ class TreeSitterAnalyzer() : IRecoveryAnalyzer<Int> {
 
 //        // На файле с xml разметкой для логитека рекурсия падает со стак овервлоу((((
 //        // поэтому переделываем без рекурсии
-//        fun traverse(node: TSNode) {
-//            val stack = ArrayDeque<TSNode>()
-//            stack.addFirst(node)
-//
-//            while (stack.isNotEmpty()) {
-//                val current = stack.removeFirst()
-//
-//                if (current.childCount == 0) {
-//                    if (current.parent.isError) {
-//                        leaves.add("error")
-//                    } else {
-//                        leaves.add(current.type)
-//                    }
-//                }
-//
-//                // Добавляем дочерние узлы в обратном порядке,
-//                // чтобы обрабатывать их в прямом порядке
-//                for (i in current.childCount - 1 downTo 0) {
-//                    stack.addFirst(current.getChild(i)!!)
-//                }
-//            }
-//        }
+    fun traverseStack(node: TSNode) {
+        val stack = ArrayDeque<TSNode>()
+        stack.addFirst(node)
+
+        while (stack.isNotEmpty()) {
+            val current = stack.removeFirst()
+
+            if (current.childCount == 0) {
+                // Терминальная нода: проверяем родителя, как было раньше
+                if (current.parent.isError) {
+                    leaves.add("error")
+                } else {
+                    leaves.add(current.type)
+                }
+            } else if (current.isError) {
+                // Если это error-нода, проверяем, есть ли прямые терминальные потомки
+                var hasTerminalChildren = false
+                for (i in 0 until current.childCount) {
+                    if (current.getChild(i)!!.childCount == 0) {
+                        hasTerminalChildren = true
+                        break
+                    }
+                }
+                // Если у error-ноды нет прямых терминальных потомков, добавляем "error"
+                if (!hasTerminalChildren) {
+                    leaves.add("error")
+                }
+            }
+
+            // Добавляем дочерние узлы в обратном порядке,
+            // чтобы обрабатывать их в прямом порядке
+            for (i in current.childCount - 1 downTo 0) {
+                stack.addFirst(current.getChild(i)!!)
+            }
+        }
+    }
 //
 
         fun traverse(node: TSNode) {
             if (node.childCount == 0) {
+                // Терминальная нода: проверяем родителя, как было раньше
                 if (node.parent.isError) {
                     leaves.add("error")
                 } else {
                     leaves.add(node.type)
                 }
+            } else if (node.isError) {
+                // Если это error-нода, проверяем, есть ли прямые терминальные потомки
+                var hasTerminalChildren = false
+                for (i in 0 until node.childCount) {
+                    if (node.getChild(i)!!.childCount == 0) {
+                        hasTerminalChildren = true
+                        break
+                    }
+                }
+                // Если у error-ноды нет прямых терминальных потомков, добавляем "error"
+                if (!hasTerminalChildren) {
+                    leaves.add("error")
+                }
             }
 
+            // Рекурсивно обходим детей
             for (i in 0 until node.childCount) {
                 traverse(node.getChild(i)!!)
             }
         }
 
-        traverse(tree.rootNode)
+        try {
+            traverse(tree.rootNode) // Пробуем рекурсию
+        } catch (e: StackOverflowError) {
+            println("StackOverflowError occurred, switching to stack-based traversal")
+            leaves.clear() // Очищаем листья
+            traverseStack(tree.rootNode) // Переключаемся на итеративный подход
+        }
+
         return leaves.joinToString(" ")
     }
     var parser:TSParser = TSParser()
@@ -122,19 +158,31 @@ int main(){
 int main(){}}}
    """
 
-    val code = """
-public class Test {
-    public static void main(String[] args) {{{{{
-        System.out.println("Hello World!");
-    }
-}
-"""
+    val score_0_class_expected = """
+        class phs
+        {
+           rrrrrrrrrrrr (rrr[ ]) 
+         {
+             hyfhhhhh(h[]);
+            }
+        }
+    """.trimIndent()
+
+    val code  = score_0_class_expected
+
+//    val code = """
+//public class Test {
+//    public static void main(String[] args) {{{{{
+//        System.out.println("Hello World!");
+//    }
+//}
+//"""
 
     val lexerTokens = analyzer.getLexerTokens(code)
     val parserTokens = analyzer.getParserTokens(code)
 
     println("code: $code")
-    println("Lexer Tokens (JFlex): $lexerTokens")
-    println("Parser Tokens (Tree-sitter): $parserTokens")
+    println("Lexer Tokens (JFlex):\n$lexerTokens")
+    println("Parser Tokens (Tree-sitter):\n$parserTokens")
     println("Similarity: ${analyzer.calculateSimilarity(code)}")
 }
