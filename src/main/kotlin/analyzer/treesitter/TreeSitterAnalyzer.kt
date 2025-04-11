@@ -5,6 +5,7 @@ import analyzer.IRecoveryAnalyzer
 import jflex.JavaScanner
 import jflex.JavaToken
 import jflex.TreeSitterLexer
+import old.captureDotGraph
 import org.treesitter.TSNode
 import org.treesitter.TSParser
 import org.treesitter.TreeSitterJava
@@ -168,7 +169,16 @@ int main(){}}}
         }
     """.trimIndent()
 
-    val code  = score_0_class_expected
+    val oldScore1Semi = """
+        class HAPPY
+        { Chatbot c;
+            HAPPY(Chatbot cneu)
+            { c= cneu
+            }
+        }
+    """.trimIndent()
+
+    val code  = oldScore1Semi
 
 //    val code = """
 //public class Test {
@@ -180,6 +190,7 @@ int main(){}}}
 
     val lexerTokens = analyzer.getLexerTokens(code)
     val parserTokens = analyzer.getParserTokens(code)
+
 
     println("code: $code")
     println("Lexer Tokens (JFlex):\n$lexerTokens")

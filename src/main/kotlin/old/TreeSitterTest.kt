@@ -20,15 +20,12 @@ fun main() {
 
 ////    val code = """int main(){z;}""".trimIndent()
     val code = """
-        class phs
-        {
-           rrrrrrrrrrrr (rrr[ ]) 
-         {
-             hyfhhhhh(h[]);
+        class HAPPY
+        { Chatbot c;
+            HAPPY(Chatbot cneu)
+            { c= cneu
             }
         }
-        
-        
     """.trimIndent()
 //    val filePath = "C:\\data\\java_src_files\\8821304_307656826" // Укажите путь к файлу
 //    val code = File(filePath).readText()

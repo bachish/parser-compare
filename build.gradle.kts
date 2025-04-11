@@ -65,36 +65,46 @@ tasks.withType<Jar> {
 
 
 
-tasks.register("runDagster") {
+tasks.register("runDagsterWebserver") {
+    description = "Runs dagster-webserver in a new PowerShell window"
     group = "dagster"
-    description = "Запускает Dagster webserver и daemon"
 
     doLast {
-        val projectDir = project.projectDir.absolutePath.replace("\\", "/")
-        val venvActivate = "$projectDir/dagster/venv/Scripts/activate"
-        val pipelineFile = "$projectDir/dagster/pipelines/file_pipeline.py"
-        val dagsterHome = "C:/Users/huawei/IdeaProjects/antlr_test_2/dagster/dagster_home"
-        File("$dagsterHome/history").mkdirs()
+        // Получаем текущую директорию проекта и добавляем папку dagster
+        val dagsterDir = File(project.projectDir, "dagster").absolutePath.replace("\\", "\\\\")
 
-        val dagsterWebserver = ProcessBuilder(
-            "cmd", "/c", "start", "cmd", "/k",
-            "call \"$venvActivate\" && dagster-webserver -f \"$pipelineFile\" -p 3001"
-        )
-            .directory(File(projectDir))
-            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start()
-
-        val dagsterDaemon = ProcessBuilder(
-            "cmd", "/c", "start", "cmd", "/k",
-            "call \"$venvActivate\" && dagster-daemon run -w \"$projectDir/dagster/workspace.yaml\""
-        )
-            .directory(File(projectDir))
-            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start()
-
-        dagsterWebserver.waitFor()
-        dagsterDaemon.waitFor()
+        exec {
+            // Команда для запуска нового окна PowerShell и выполнения dagster-webserver
+            commandLine = listOf(
+                "powershell",
+                "-Command",
+                "Start-Process powershell -ArgumentList '-NoExit -Command cd $dagsterDir; .\\venv\\Scripts\\activate; dagster-webserver -w workspace.yaml -p 3001'"
+            )
+        }
     }
+}
+
+tasks.register("runDagsterDaemon") {
+    description = "Runs dagster-daemon in a new PowerShell window"
+    group = "dagster"
+
+    doLast {
+        // Получаем текущую директорию проекта и добавляем папку dagster
+        val dagsterDir = File(project.projectDir, "dagster").absolutePath.replace("\\", "\\\\")
+
+        exec {
+            // Команда для запуска нового окна PowerShell и выполнения dagster-daemon
+            commandLine = listOf(
+                "powershell",
+                "-Command",
+                "Start-Process powershell -ArgumentList '-NoExit -Command cd $dagsterDir; .\\venv\\Scripts\\activate; dagster-daemon run -w workspace.yaml'"
+            )
+        }
+    }
+}
+
+tasks.register("runDagsterAll") {
+    description = "Runs both dagster-webserver and dagster-daemon in separate PowerShell windows"
+    group = "dagster"
+    dependsOn("runDagsterWebserver", "runDagsterDaemon")
 }
