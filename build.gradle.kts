@@ -46,12 +46,12 @@ sourceSets {
 }
 
 application {
-    mainClass.set("MeasureParsingTimeMainKt")
+    mainClass.set("MainKt")
 }
 
 tasks.withType<Jar> {
     manifest {
-        attributes["Main-Class"] = "MeasureParsingTimeMainKt"  // Указание на главный класс
+        attributes["Main-Class"] = "MainKt"  // Указание на главный класс
     }
     from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
 

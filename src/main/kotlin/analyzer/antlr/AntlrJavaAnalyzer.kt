@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import kotlin.system.measureNanoTime
 
-// Реализация для Java с использованием ANTLR (токены как пара текст-тип)
+// Реализация для Java с использованием ANTLR
 class AntlrJavaAnalyzer : IRecoveryAnalyzer<Int> {
     override fun getLexerTokens(code: String): List<Int> {
         val lexer = JavaLexer(CharStreams.fromString(code))
@@ -39,6 +39,7 @@ class AntlrJavaAnalyzer : IRecoveryAnalyzer<Int> {
             .map {  it.type }
     }
 
+    var sink:Int = 0
     override fun measureParse(code: String): Long {
         val lexer = JavaLexer(CharStreams.fromString(code))
         lexer.removeErrorListeners()
@@ -47,6 +48,7 @@ class AntlrJavaAnalyzer : IRecoveryAnalyzer<Int> {
             val parser = JavaParser(tokenStream)
             parser.removeErrorListeners()
             val tree = parser.compilationUnit()
+            sink += tree.hashCode() % 10
         }
     }
 }
