@@ -1,0 +1,18 @@
+[
+  {
+    "title": "ANTLR-Java",
+    "color": "#d62728"
+  },
+  {
+    "title": "ANTLR-Java8-spec",
+    "color": "#ff7f0e"
+  },
+  {
+    "title": "Tree-sitter",
+    "color": "#2ca02c"
+  },
+  {
+    "title": "JDT-JLS21",
+    "color": "#9467bd"
+  }
+]

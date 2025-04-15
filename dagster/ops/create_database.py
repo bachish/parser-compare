@@ -84,9 +84,6 @@ def create_database(context: OpExecutionContext) -> str:
         )
     ''')
 
-    # SQLite автоматически создаёт таблицу sqlite_sequence для AUTOINCREMENT
-    # Её не нужно создавать вручную
-
     # Сохраняем изменения
     conn.commit()
     conn.close()
