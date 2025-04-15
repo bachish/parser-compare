@@ -1,9 +1,8 @@
 # ops/measure_parsing_time.py
-
 import os
 import subprocess
 from dagster import op, OpExecutionContext, Config, Out
-from config.settings import JAR_PATH, JAVA_EXECUTABLE, OUTPUT_CSV_DIR
+from config.settings import JAR_PATH, JAVA_EXECUTABLE, OUTPUT_TIMES_DIR
 
 class ParsingConfig(Config):
     analyzer_type: str
@@ -11,12 +10,12 @@ class ParsingConfig(Config):
 
 @op(out=Out(str))
 def measure_parsing_time(context: OpExecutionContext, dataset_path: str, config: ParsingConfig) -> str:
-    dataset_name = os.path.basename(dataset_path)  # Имя датасета (например, RxJava)
+    dataset_name = os.path.basename(dataset_path)
     output_csv_filename = f"{config.analyzer_type}_measureParsingTime_{dataset_name}.csv"
-    output_csv_path = os.path.join(OUTPUT_CSV_DIR, output_csv_filename)
+    output_csv_path = os.path.join(OUTPUT_TIMES_DIR, output_csv_filename)
 
     # Создаём директорию, если её нет
-    os.makedirs(OUTPUT_CSV_DIR, exist_ok=True)
+    os.makedirs(OUTPUT_TIMES_DIR, exist_ok=True)
 
     cmd = [
         JAVA_EXECUTABLE,
