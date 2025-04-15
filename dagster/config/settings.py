@@ -8,6 +8,9 @@ OUTPUT_CSV_DIR = os.path.join(DAGSTER_HOME, "output")
 OUTPUT_TIMES_DIR = os.path.join(OUTPUT_CSV_DIR, "times")  # Для замеров времени
 OUTPUT_SCORES_DIR = os.path.join(OUTPUT_CSV_DIR, "scores")  # Для скоров
 
+DB_DIR = os.path.join(DAGSTER_HOME, "db")
+DB_PATH = os.path.join(DB_DIR, "parser_results.db")
+
 # Путь к JAR-файлу
 JAR_PATH = f"{BASE_DIR}/build/libs/antlr_test_2-1.0-SNAPSHOT.jar"
 
