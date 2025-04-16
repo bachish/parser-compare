@@ -75,7 +75,6 @@ def create_database(context: OpExecutionContext) -> str:
             score REAL NOT NULL,
             distance INTEGER,
             number_of_parsed_tokens INTEGER,
-            parsing_walker_time_nanos INTEGER,
             parsing_time_nanos INTEGER,
             number_of_syntax_errors INTEGER,
             PRIMARY KEY (id_parser, id_file),

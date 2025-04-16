@@ -1,18 +1,22 @@
 [
   {
     "title": "ANTLR-Java",
-    "color": "#d62728"
+    "color": "#d62728",
+    "analyzer_type": "AntlrJavaAnalyzer"
   },
   {
     "title": "ANTLR-Java8-spec",
-    "color": "#ff7f0e"
+    "color": "#ff7f0e",
+    "analyzer_type": "AntlrJava8Analyzer"
   },
   {
     "title": "Tree-sitter",
-    "color": "#2ca02c"
+    "color": "#2ca02c",
+    "analyzer_type": "TreeSitterAnalyzer"
   },
   {
     "title": "JDT-JLS21",
-    "color": "#9467bd"
+    "color": "#9467bd",
+    "analyzer_type": "JDTAnalyzer"
   }
 ]
