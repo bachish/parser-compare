@@ -12,7 +12,10 @@ class DatasetConfig(Config):
 def dataset(context: OpExecutionContext, config: DatasetConfig) -> str:
     dataset_path = os.path.join(DATASETS_DIR, config.dataset_name)
     if os.path.exists(dataset_path):
-        shutil.rmtree(dataset_path)
+        # shutil.rmtree(dataset_path)
+        context.log.info(f"Dataset already exists at {dataset_path}, skipping copy.")
+        return dataset_path
+
     os.makedirs(dataset_path, exist_ok=True)
     file_count = 0
     for root, _, files in os.walk(config.source_folder):

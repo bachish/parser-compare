@@ -2,3 +2,4 @@ load_from:
   - python_file: "jobs/measure_time.py"
   - python_file: "jobs/scores_calculation.py"
   - python_file: "jobs/init_database.py"
+  - python_file: "jobs/errors_calculation.py"
