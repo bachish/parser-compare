@@ -7,12 +7,10 @@ from dagster import op, OpExecutionContext, In, Out
 from config.settings import DB_PATH
 from pathlib import Path
 
-@op(ins={"db_path": In(str), "scores_csv_path": In(str)}, out=Out(str))
-def populate_scores(context: OpExecutionContext, db_path: str, scores_csv_path: str) -> str:
-    # Получаем analyzer_type из конфига
-    analyzer_type = context.op_config.get("analyzer_type")
-    if not analyzer_type:
-        raise ValueError("analyzer_type must be provided in op config")
+@op(ins={"db_path": In(str), "scores_data": In(tuple)}, out=Out(str))
+def populate_scores(context: OpExecutionContext, db_path: str, scores_data: tuple) -> str:
+    # Распаковываем кортеж
+    scores_csv_path, analyzer_type = scores_data
 
     # Читаем parsers.json для маппинга
     parsers_file = Path(__file__).parent.parent / "config" / "parsers.json"
