@@ -1,5 +1,3 @@
-package old
-
 import com.sun.source.util.JavacTask
 import me.tongfei.progressbar.ProgressBar
 import java.io.File
@@ -22,87 +20,87 @@ data class CompilationError(
     val lineNumber: Long
 )
 
-
-
-object JavacRunnerWithProgress {
+object JavacRunner {
     @JvmStatic
     fun main(args: Array<String>) {
-        val directoryPath = "C:/data/java_src_files_java/" // Директория с файлами
-        val outputCsvPath = "output_with_progress-3.csv"   // Путь к CSV для записи
+        val directoryPath = "C:\\Users\\huawei\\Desktop\\test_error_files" // Директория с файлами
+        val outputCsvPath = "output_errors.csv"   // Путь к CSV для записи
         val maxFiles = Int.MAX_VALUE                       // Максимальное количество файлов
         val append = true                                  // Режим добавления
-        processFiles(directoryPath, outputCsvPath, maxFiles, append)
+
+        // Пример вызова с прогресс-баром:
+//        processFiles(directoryPath, outputCsvPath, maxFiles, append, withProgressBar = true)
+
+        // Пример вызова без прогресс-бара:
+         processFiles(directoryPath, outputCsvPath, maxFiles, append)
     }
 
     fun processFiles(
         directoryPath: String,
         outputCsvPath: String,
         maxFiles: Int = Int.MAX_VALUE,
-        append: Boolean = true
+        append: Boolean = true,
+        withProgressBar: Boolean = false
     ) {
-        // Определяем последний обработанный файл, если append = true
         val startFile = if (append) {
             val existingLines = File(outputCsvPath).takeIf { it.exists() }?.readLines().orEmpty()
-            existingLines.lastOrNull()?.split(",")?.firstOrNull() // Имя последнего обработанного файла
-        } else {
-            null // Если не append, начинаем с первого файла
-        }
+            existingLines.lastOrNull()?.split(",")?.firstOrNull()
+        } else null
 
         val files = File(directoryPath).listFiles()
             ?.filter { it.isFile }
-            ?.sortedBy { it.name } // Сортируем файлы по имени для предсказуемости
+            ?.sortedBy { it.name }
             ?.let { fileList ->
                 if (startFile != null) {
                     println("Resuming from file: $startFile")
                     val startIndex = fileList.indexOfFirst { it.name == startFile }
                     if (startIndex != -1) fileList.drop(startIndex + 1) else emptyList()
-                } else {
-                    fileList
-                }
+                } else fileList
             }
             ?.take(maxFiles)
             ?: emptyList()
 
-        // Определение режима для записи (добавление или создание нового файла)
         val openOption = if (append && File(outputCsvPath).exists()) StandardOpenOption.APPEND else StandardOpenOption.CREATE
-
-        // Создаем BufferedWriter для записи в CSV файл
         val writer = Files.newBufferedWriter(Paths.get(outputCsvPath), openOption)
+
         try {
-            // Записываем заголовок, если файл создается с нуля
             if (openOption == StandardOpenOption.CREATE) {
                 writer.append("fileName,code,message,position,end_position,column_number,line_number\n")
             }
 
-            // Используем ProgressBar для отображения прогресса
-            ProgressBar("Processing Files", files.size.toLong()).use { pb ->
-                files.forEach { file ->
-                    // Компилируем файл и собираем ошибки
-                    val errors = compileJavaFile(file)
-
-                    // Записываем результаты в CSV
-                    if (errors.isEmpty()) {
-                        writer.append("${file.name},No Error,Success,Null,Null,Null,Null\n")
-                    } else {
-                        for (error in errors) {
-                            writer.append(
-                                "${file.name}," +
-                                "\"${error.code}\"," +
-                                "\"${error.message}\"," +
-                                "\"${error.position}\"," +
-                                "\"${error.endPosition}\"," +
-                                "\"${error.columnNumber}\"" +
-                                "\"${error.lineNumber}\"\n"
-                            )
-                        }
+            val process: (File) -> Unit = { file ->
+                val errors = compileJavaFile(file)
+                if (errors.isEmpty()) {
+                    writer.append("${file.name},No Error,Success,Null,Null,Null,Null\n")
+                } else {
+                    for (error in errors) {
+                        writer.append(
+                            "${file.name}," +
+                                    "\"${error.code}\"," +
+                                    "\"${error.message}\"," +
+                                    "\"${error.position}\"," +
+                                    "\"${error.endPosition}\"," +
+                                    "\"${error.columnNumber}\"," +
+                                    "\"${error.lineNumber}\"\n"
+                        )
                     }
-                    writer.flush() // Сразу записываем в файл
-
-                    pb.step() // Обновляем прогресс-бар
                 }
+                writer.flush()
             }
+
+            if (withProgressBar) {
+                ProgressBar("Processing Files", files.size.toLong()).use { pb ->
+                    files.forEach { file ->
+                        process(file)
+                        pb.step()
+                    }
+                }
+            } else {
+                files.forEach { file -> process(file) }
+            }
+
         } finally {
-            writer.close() // Закрываем writer
+            writer.close()
         }
 
         println("Processing complete. Results written to $outputCsvPath")
@@ -131,22 +129,33 @@ object JavacRunnerWithProgress {
                 diagnostic.getMessage(null),
                 diagnostic.position,
                 diagnostic.endPosition,
-                diagnostic.columnNumber.toLong(),
-                diagnostic.lineNumber.toLong()
+                diagnostic.columnNumber,
+                diagnostic.lineNumber
             )
         }
     }
 
-
-    private class JavaSourceFromFile(file: File) :
+    private class JavaSourceFromFile(originalFile: File) :
         SimpleJavaFileObject(
-            URI.create("file:///${file.absolutePath.replace("\\", "/")}"),
+            URI.create("file:///${ensureJavaExtension(originalFile).absolutePath.replace("\\", "/")}"),
             JavaFileObject.Kind.SOURCE
         ) {
-        private val content: String = file.readText()
 
-        override fun getCharContent(ignoreEncodingErrors: Boolean): CharSequence {
-            return content
+        private val content: String = originalFile.readText()
+
+        override fun getCharContent(ignoreEncodingErrors: Boolean): CharSequence = content
+
+        companion object {
+            private fun ensureJavaExtension(file: File): File {
+                return if (file.name.endsWith(".java")) {
+                    file
+                } else {
+                    val tempFile = File.createTempFile(file.nameWithoutExtension, ".java")
+                    tempFile.writeText(file.readText())
+                    tempFile.deleteOnExit()
+                    tempFile
+                }
+            }
         }
     }
 }
