@@ -2,8 +2,8 @@
 
 from dagster import job
 from assets.dataset import dataset
-from ops.calculate_errors import calculate_errors
-from ops.preprocess_errors import preprocess_errors
+from ops.errors.calculate_errors import calculate_errors
+from ops.errors.preprocess_errors import preprocess_errors
 
 @job
 def errors_calculation_job():

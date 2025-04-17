@@ -1,9 +1,9 @@
 # jobs/scores_calculation.py
 from dagster import job
 from assets.dataset import dataset
-from ops.calculate_scores import calculate_scores
-from ops.populate_files import populate_files
-from ops.populate_scores import populate_scores
+from ops.scores.calculate_scores import calculate_scores
+from ops.scores.populate_files import populate_files
+from ops.scores.populate_scores import populate_scores
 
 @job
 def scores_calculation_job():
