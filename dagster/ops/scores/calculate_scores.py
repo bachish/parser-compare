@@ -1,4 +1,4 @@
-# ops/calculate_scores.py
+# ops/scores/calculate_scores.py
 import os
 import subprocess
 from dagster import op, OpExecutionContext, Config, Out

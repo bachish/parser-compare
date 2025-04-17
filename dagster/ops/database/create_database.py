@@ -1,4 +1,4 @@
-# ops/create_database.py
+# ops/database/create_database.py
 
 import os
 import sqlite3

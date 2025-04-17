@@ -1,4 +1,4 @@
-# ops/populate_scores.py
+# ops/scores/populate_scores.py
 
 import csv
 import json

@@ -1,4 +1,4 @@
-# ops/measure_parsing_time.py
+# ops/measure/measure_parsing_time.py
 import os
 import subprocess
 from dagster import op, OpExecutionContext, Config, Out

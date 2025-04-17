@@ -1,4 +1,4 @@
-# ops/calculate_errors.py
+# ops/errors/calculate_errors.py
 
 import os
 import subprocess
