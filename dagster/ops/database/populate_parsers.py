@@ -3,16 +3,14 @@
 import json
 import sqlite3
 from dagster import op, OpExecutionContext, In, Out
-from config.settings import DB_PATH
+from config.settings import DB_PATH, PARSERS_JSON_FILE
 from pathlib import Path
 
 @op(ins={"db_path": In(str)}, out=Out(str))
 def populate_parsers(context: OpExecutionContext, db_path: str) -> str:
-    # Путь к файлу parsers.json
-    parsers_file = Path(__file__).parent.parent / "config" / "parsers.json"
 
     # Читаем данные парсеров
-    with open(parsers_file, "r", encoding="utf-8") as f:
+    with open(PARSERS_JSON_FILE, "r", encoding="utf-8") as f:
         parsers = json.load(f)
 
     # Подключаемся к базе данных

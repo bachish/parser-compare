@@ -4,8 +4,7 @@ import csv
 import json
 import sqlite3
 from dagster import op, OpExecutionContext, In, Out
-from config.settings import DB_PATH
-from pathlib import Path
+from config.settings import PARSERS_JSON_FILE
 
 @op(ins={"db_path": In(str), "scores_data": In(tuple)}, out=Out(str))
 def populate_scores(context: OpExecutionContext, db_path: str, scores_data: tuple) -> str:
@@ -13,8 +12,7 @@ def populate_scores(context: OpExecutionContext, db_path: str, scores_data: tupl
     scores_csv_path, analyzer_type = scores_data
 
     # Читаем parsers.json для маппинга
-    parsers_file = Path(__file__).parent.parent / "config" / "parsers.json"
-    with open(parsers_file, "r", encoding="utf-8") as f:
+    with open(PARSERS_JSON_FILE, "r", encoding="utf-8") as f:
         parsers = json.load(f)
 
     # Находим title для analyzer_type

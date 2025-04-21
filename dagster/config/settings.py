@@ -17,3 +17,6 @@ JAR_PATH = f"{BASE_DIR}/build/libs/antlr_test_2-1.0-SNAPSHOT.jar"
 
 # Путь к Java
 JAVA_EXECUTABLE = '"C:\\Program Files\\JetBrains\\IntelliJ IDEA Community Edition 2024.3\\jbr\\bin\\java.exe"'
+
+# Путь к мапленному json файлу с парсерами
+PARSERS_JSON_FILE = os.path.join(BASE_DIR, "dagster", "config", "parsers.json")
