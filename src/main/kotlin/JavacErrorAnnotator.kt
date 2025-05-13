@@ -20,7 +20,7 @@ data class CompilationError(
     val lineNumber: Long
 )
 
-object JavacRunner {
+object JavacErrorAnnotator {
     @JvmStatic
     fun main(args: Array<String>) {
         val directoryPath = "C:\\Users\\huawei\\Desktop\\test_error_files" // Директория с файлами

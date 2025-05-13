@@ -38,7 +38,7 @@ fun main(args: Array<String>) {
             val outputCsvPath = args[2]
             val analyzerType = args[3]
             val analyzer = AnalyzerFactory.create<Any>(analyzerType)
-            processFiles(
+            scoreCalculate(
                 directoryPath = directoryPath,
                 outputCsvPath = outputCsvPath,
                 analyzer = analyzer,
@@ -54,7 +54,7 @@ fun main(args: Array<String>) {
             val outputCsvPath = args[2]
             val withProgress = args.contains("--progress")
 
-            JavacRunner.processFiles(
+            JavacErrorAnnotator.processFiles(
                 directoryPath = directoryPath,
                 outputCsvPath = outputCsvPath,
                 append = true,

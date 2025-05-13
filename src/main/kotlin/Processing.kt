@@ -1,6 +1,4 @@
 import analyzer.IRecoveryAnalyzer
-import analyzer.antlr.AntlrJava8Analyzer
-import analyzer.jdt.JDTAnalyzer
 import analyzer.treesitter.TreeSitterAnalyzer
 import java.io.File
 import java.nio.file.Files
@@ -8,7 +6,7 @@ import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import me.tongfei.progressbar.ProgressBar
 
-fun <T> processFiles(
+fun <T> scoreCalculate(
     directoryPath: String,
     outputCsvPath: String,
     analyzer: IRecoveryAnalyzer<T>,
@@ -70,7 +68,7 @@ fun <T> processFiles(
 fun main() {
 
     val analyzer = TreeSitterAnalyzer()
-    processFiles(
+    scoreCalculate(
         directoryPath = "C:\\data\\java_src_files",
         outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_all_scores.csv",
         analyzer = analyzer,
