@@ -1,7 +1,8 @@
-package analyzer.javac
+package parsers.javac
 
-import analyzer.IRecoveryAnalyzer
+import parsers.IRecoveryAnalyzer
 import com.sun.source.util.JavacTask
+import measure.ErrorInfo
 import java.io.File
 import java.net.URI
 import javax.tools.DiagnosticCollector
@@ -16,6 +17,10 @@ class JavacAnalyzer : IRecoveryAnalyzer<String> {
     }
 
     override fun getParserTokens(code: String): List<String> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getErrors(code: String): List<ErrorInfo> {
         TODO("Not yet implemented")
     }
 

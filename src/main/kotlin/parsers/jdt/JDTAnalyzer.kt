@@ -1,13 +1,13 @@
-package analyzer.jdt
+package parsers.jdt
 
 
-import analyzer.IRecoveryAnalyzer
+import parsers.IRecoveryAnalyzer
 import jflex.JavaScanner
 import jflex.JavaToken
+import measure.ErrorInfo
 import org.eclipse.jdt.core.dom.AST
 import org.eclipse.jdt.core.dom.ASTParser
 import org.eclipse.jdt.core.dom.CompilationUnit
-import org.eclipse.jdt.internal.core.dom.NaiveASTFlattener
 import java.io.File
 import java.io.StringReader
 import kotlin.system.measureNanoTime
@@ -47,6 +47,10 @@ class JDTAnalyzer : IRecoveryAnalyzer<Int> {
             tokens.add(token.ordinal) // Извлекаем тип токена как Int (ordinal из enum JavaToken)
         }
         return tokens
+    }
+
+    override fun getErrors(code: String): List<ErrorInfo> {
+        TODO("Not yet implemented")
     }
 
     override fun measureParse(code: String): Long {

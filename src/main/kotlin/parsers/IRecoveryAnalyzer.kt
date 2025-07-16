@@ -1,7 +1,8 @@
-package analyzer
+package parsers
 
-import analyzer.antlr.AntlrJava8Analyzer
-import analyzer.antlr.AntlrJavaAnalyzer
+import measure.ErrorInfo
+import parsers.antlr.AntlrJava8Analyzer
+import parsers.antlr.AntlrJavaAnalyzer
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -9,10 +10,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 // Интерфейс для анализа кода (T - тип токенов)
-interface IRecoveryAnalyzer<T> {
-    fun getLexerTokens(code: String): List<T>
-    fun getParserTokens(code: String): List<T>
-
+interface IRecoveryAnalyzer<TokenType> {
+    fun getLexerTokens(code: String): List<TokenType>
+    fun getParserTokens(code: String): List<TokenType>
+    fun getErrors(code: String): List<ErrorInfo>
     fun calculateSimilarity(code: String): Double {
         val lexerTokens = getLexerTokens(code)
         val parserTokens = getParserTokens(code)
@@ -25,14 +26,14 @@ interface IRecoveryAnalyzer<T> {
         val code = Files.readString(Paths.get(file.absolutePath))
         try {
             return calculateSimilarity(code)
-        } catch (e: Throwable){
+        } catch (e: Throwable) {
             println("\nCan't process file \n${file.absolutePath}")
             println(e.message)
             throw e
         }
     }
 
-//    fun hollowParse(code: String) {
+    //    fun hollowParse(code: String) {
 //        getLexerTokens(code)
 //        getParserTokens(code)
 //    }
@@ -76,24 +77,13 @@ object LevenshteinUtils {
 }
 
 
-// Пример реализации для не-ANTLR парсера
-class NewAnalyzer : IRecoveryAnalyzer<String> {
-    override fun getLexerTokens(code: String): List<String> {
-        return code.split(" ").filter { it.isNotBlank() }
-    }
 
-    override fun getParserTokens(code: String): List<String> {
-        return code.split(" ").filter { it.isNotBlank() }
-    }
-}
 
 fun main() {
     val javaAnalyzer = AntlrJavaAnalyzer()
     val java8Analyzer = AntlrJava8Analyzer()
-    val newAnalyzer = NewAnalyzer()
     val code = "class Test { void method(){ int x; x; } }" // not.stmt
 
     println("Java Similarity: ${javaAnalyzer.calculateSimilarity(code)}")
     println("Java8 Similarity: ${java8Analyzer.calculateSimilarity(code)}")
-    println("New Similarity: ${newAnalyzer.calculateSimilarity(code)}")
 }

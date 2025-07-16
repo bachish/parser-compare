@@ -1,18 +1,7 @@
-import java.util.*
-
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-}
-
-
-
 plugins {
     kotlin("jvm") version "2.0.20"
     application
 }
-
-group = "org.example"
-version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -33,6 +22,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
 kotlin {
     jvmToolchain(21)
 }
@@ -46,55 +36,11 @@ sourceSets {
 }
 
 application {
-    mainClass.set("MeasureParsingTimeMainKt")
+    mainClass.set("RunnerKt")
 }
 
-tasks.withType<Jar> {
-    manifest {
-        attributes["Main-Class"] = "MeasureParsingTimeMainKt"  // Указание на главный класс
-    }
-    from(configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) })
-
-    exclude("META-INF/*.SF")
-    exclude("META-INF/*.DSA")
-    exclude("META-INF/*.RSA")
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-
-}
-
-
-
-tasks.register("runDagster") {
-    group = "dagster"
-    description = "Запускает Dagster webserver и daemon"
-
-    doLast {
-        val projectDir = project.projectDir.absolutePath.replace("\\", "/")
-        val venvActivate = "$projectDir/dagster/venv/Scripts/activate"
-        val pipelineFile = "$projectDir/dagster/pipelines/file_pipeline.py"
-        val dagsterHome = "C:/Users/huawei/IdeaProjects/antlr_test_2/dagster/dagster_home"
-        File("$dagsterHome/history").mkdirs()
-
-        val dagsterWebserver = ProcessBuilder(
-            "cmd", "/c", "start", "cmd", "/k",
-            "call \"$venvActivate\" && dagster-webserver -f \"$pipelineFile\" -p 3001"
-        )
-            .directory(File(projectDir))
-            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start()
-
-        val dagsterDaemon = ProcessBuilder(
-            "cmd", "/c", "start", "cmd", "/k",
-            "call \"$venvActivate\" && dagster-daemon run -w \"$projectDir/dagster/workspace.yaml\""
-        )
-            .directory(File(projectDir))
-            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start()
-
-        dagsterWebserver.waitFor()
-        dagsterDaemon.waitFor()
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }

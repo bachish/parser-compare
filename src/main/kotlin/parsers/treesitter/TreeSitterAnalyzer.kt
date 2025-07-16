@@ -1,10 +1,11 @@
 
-package analyzer.treesitter
+package parsers.treesitter
 
-import analyzer.IRecoveryAnalyzer
+import parsers.IRecoveryAnalyzer
 import jflex.JavaScanner
 import jflex.JavaToken
 import jflex.TreeSitterLexer
+import measure.ErrorInfo
 import org.treesitter.TSNode
 import org.treesitter.TSParser
 import org.treesitter.TreeSitterJava
@@ -33,6 +34,10 @@ class TreeSitterAnalyzer() : IRecoveryAnalyzer<Int> {
             tokens.add(token!!.ordinal) // Извлекаем тип токена как Int (ordinal из enum JavaToken)
         }
         return tokens
+    }
+
+    override fun getErrors(code: String): List<ErrorInfo> {
+        TODO("Not yet implemented")
     }
 
     // Вспомогательная функция для получения листьев дерева TreeSitter

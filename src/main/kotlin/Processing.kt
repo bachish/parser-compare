@@ -1,7 +1,5 @@
-import analyzer.IRecoveryAnalyzer
-import analyzer.antlr.AntlrJava8Analyzer
-import analyzer.jdt.JDTAnalyzer
-import analyzer.treesitter.TreeSitterAnalyzer
+import parsers.IRecoveryAnalyzer
+import parsers.jdt.JDTAnalyzer
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
