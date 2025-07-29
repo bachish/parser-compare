@@ -1,15 +1,15 @@
+import parsers.IRecoveryAnalyzer
+import parsers.jdt.JDTAnalyzer
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
-import kotlin.system.measureNanoTime
 import me.tongfei.progressbar.ProgressBar
 
-fun measureParsingTime(
+fun <T> processFiles(
     directoryPath: String,
     outputCsvPath: String,
-    analyzer: OldCodeAnalyzer,
-    warmupFilesCount: Int = 10,
+    analyzer: IRecoveryAnalyzer<T>,
     maxFiles: Int = Int.MAX_VALUE,
     append: Boolean = true
 ) {
@@ -26,7 +26,7 @@ fun measureParsingTime(
         ?.sortedBy { it.name } // Сортируем файлы по имени для предсказуемости
         ?.let { fileList ->
             if (startFile != null) {
-                println("Continuing from file: $startFile")
+                println("startFile = $startFile")
                 val startIndex = fileList.indexOfFirst { it.name == startFile }
                 if (startIndex != -1) fileList.drop(startIndex + 1) else emptyList()
             } else {
@@ -36,39 +36,23 @@ fun measureParsingTime(
         ?.take(maxFiles)
         ?: emptyList()
 
-    // Прогрев JVM на случайных файлах
-    println("Starting JVM warmup...")
-    val randomFiles = files.shuffled().take(warmupFilesCount)
-
-    randomFiles.forEach { file ->
-        val code = file.readText()
-        measureNanoTime {
-            analyzer.hollowParse(code)
-        } // Просто вызываем парсинг, результаты не сохраняем
-    }
-    println("JVM warmup complete.")
-
     // Определение режима для BufferedWriter
     val openOption = if (append && File(outputCsvPath).exists()) StandardOpenOption.APPEND else StandardOpenOption.CREATE
 
     // Создание BufferedWriter для записи в CSV файл
     val writer = Files.newBufferedWriter(Paths.get(outputCsvPath), openOption)
     try {
-        // Запись заголовков, если файл создается заново
+        // Запись заголовков, если файл перезаписывается
         if (openOption == StandardOpenOption.CREATE) {
-            writer.append("fileName,parsingTimeNanos\n")
+            writer.append("fileName,similarityScore\n")
         }
 
         // Используем прогресс-бар
-        ProgressBar("Measuring Parsing Time", files.size.toLong()).use { pb ->
+        ProgressBar("Processing Files", files.size.toLong()).use { pb ->
             files.forEach { file ->
-                val code = file.readText()
+                val similarity = analyzer.calculateSimilarity(file)
 
-                val parsingTime = measureNanoTime {
-                    analyzer.hollowParse(code)
-                }
-
-                writer.append("${file.name},$parsingTime\n")
+                writer.append("${file.name},$similarity\n")
                 writer.flush() // Сразу записываем в файл
 
                 pb.step()
@@ -78,5 +62,17 @@ fun measureParsingTime(
         writer.close() // Закрытие writer после окончания записи
     }
 
-    println("Parsing time measurement complete. Results written to $outputCsvPath")
+    println("Processing complete. Results written to $outputCsvPath")
+}
+
+fun main() {
+
+    val analyzer = JDTAnalyzer()
+    processFiles(
+        directoryPath = "C:\\data\\java_src_files",
+        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_all_scores.csv",
+        analyzer = analyzer,
+//        maxFiles = 50,
+        append = true
+    )
 }

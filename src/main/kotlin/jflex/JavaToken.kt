@@ -1,4 +1,4 @@
-package jflexLexer
+package jflex
 
 //import org.ucfs.parser.ParsingException
 //import org.ucfs.rsm.symbol.ITerminal

@@ -1,4 +1,4 @@
-package jflexLexer;
+package jflex;
 
 import java.util.Queue;
 import java.util.LinkedList;
@@ -165,7 +165,7 @@ WhiteSpace = [ \t\n\r\f]+    // Пробельные символы как ра�
 
   /* Специальные случаи */
   "@"                { return JavaToken.AT; }
-  "@interface"       { tokenQueue.add(JavaToken.IDENTIFIER); return JavaToken.AT; }
+  "@interface"       { tokenQueue.add(JavaToken.INTERFACE); return JavaToken.AT; }
   "\""               { yybegin(STRING_LITERAL); }
 
   /* Пробельные символы */

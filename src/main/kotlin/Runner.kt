@@ -1,14 +1,42 @@
+import parsers.AnalyzerType
+import parsers.ParserFactory
+import parsers.treesitter.TreeSitterAnalyzer
 import java.io.File
 
-//import CodeAnalyzer
 fun main(args: Array<String>) {
-    val language = "java8"
-    val analyzer = OldCodeAnalyzer(language)
+    measureErrors()
 
+    val argsSize = 4
+    if (args.size != argsSize) {
+        println("Wronr argumnent count! (expected: $argsSize, actual: ${args.size}")
+        println("Usage: <measurement> <directoryPath> <outputCsvPath> <parser>")
+        return
+    }
+
+    val measurement = args[0]
+    val directoryPath = args[1]
+    val outputCsvPath = args[2]
+    val parser = args[3]
+    //  val warmupFilesCount = args[4].toInt()
+
+    val parserAnalyzer = ParserFactory.create(parser)
+
+}
+
+fun _main(args: Array<String>) {
+    val analyzer = TreeSitterAnalyzer()
     val filePath = args[0]
 //    val filePath = "C:\\data\\java_src_files\\49030395_1874025707"
     val file = File(filePath)
-    val s = analyzer.parseFile(file)
+    val s = analyzer.measureParse(file.readText())
+}
+
+fun measureErrors() {
+    val code = "public class JavaParser extends Parser {void foo(){int x}}"
+   // val code = "clacc Main(){}"
+    var parser = ParserFactory.create(AnalyzerType.AntlrJava8Analyzer)
+    print(parser.getErrors(code))
+
 }
 
 //fun main() {

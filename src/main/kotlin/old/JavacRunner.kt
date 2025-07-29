@@ -1,4 +1,4 @@
-package org.example
+package old
 
 import com.sun.source.util.JavacTask
 import me.tongfei.progressbar.ProgressBar
@@ -12,6 +12,7 @@ import javax.tools.DiagnosticCollector
 import javax.tools.JavaFileObject
 import javax.tools.SimpleJavaFileObject
 import javax.tools.ToolProvider
+import kotlin.io.path.writeText
 
 data class CompilationError(
     val code: String,
@@ -21,8 +22,6 @@ data class CompilationError(
     val columnNumber: Long,
     val lineNumber: Long
 )
-
-
 
 object JavacRunnerWithProgress {
     @JvmStatic
@@ -106,6 +105,12 @@ object JavacRunnerWithProgress {
         }
 
         println("Processing complete. Results written to $outputCsvPath")
+    }
+
+    fun getErrors(code: String):List<CompilationError>{
+        val tempFile = kotlin.io.path.createTempFile(prefix = "kotlinTemp", suffix = ".tmp")
+        tempFile.writeText(code)
+        return compileJavaFile(tempFile.toFile())
     }
 
     @Throws(IOException::class)
