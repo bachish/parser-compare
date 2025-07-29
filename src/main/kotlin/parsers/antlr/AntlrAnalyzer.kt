@@ -1,21 +1,57 @@
 package parsers.antlr
 
 import antlr.java.JavaLexer
+import measure.ErrorInfo
 import org.antlr.v4.runtime.*
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor
 import org.antlr.v4.runtime.tree.ErrorNode
 import org.antlr.v4.runtime.tree.RuleNode
 import org.antlr.v4.runtime.tree.TerminalNode
+import parsers.CollectedErrorListener
 import parsers.IRecoveryAnalyzer
 import kotlin.system.measureNanoTime
 
 // Реализация для Java с использованием ANTLR (токены как пара текст-тип)
-abstract class AntlrAnalyzer : IRecoveryAnalyzer<Int> {
+abstract class AntlrAnalyzer<ParserType : Parser> : IRecoveryAnalyzer<Int> {
     protected var strategy: LoggingErrorStrategy? = null
     abstract fun getLexer(code: CodePointCharStream): Lexer
-    abstract fun <ParserType : Parser> getParser(tokens: CommonTokenStream): ParserType
+    abstract fun getParser(tokens: CommonTokenStream): ParserType
     abstract fun getExcludedTokens(): Set<Int>
-    abstract fun getParseTree(code: String): AntlrParserResult
+
+    override fun getErrors(code: String): List<ErrorInfo> {
+        val parserResult = getParseTreeWithErrors(code)
+        val visitor = Visitor()
+        visitor.visit(parserResult.tree)
+        return parserResult.listener!!.syntaxErrors
+    }
+
+    fun getParseTreeWithErrors(code: String): AntlrParserResult {
+        val lexer = getLexer(CharStreams.fromString(code))
+        lexer.removeErrorListeners()
+        val tokenStream = CommonTokenStream(lexer)
+        val parser = getParser(tokenStream)
+        parser.removeErrorListeners()
+        val errorListener = getErrorListener()
+        parser.addErrorListener(errorListener)
+        strategy = LoggingErrorStrategy()
+        parser.errorHandler = strategy
+        val tree = getCompilationUnit(parser)
+        return AntlrParserResult(tree, parser, errorListener)
+    }
+
+    abstract fun getCompilationUnit(parser: ParserType): ParserRuleContext
+
+    fun getParseTree(code: String): AntlrParserResult {
+        val lexer = getLexer(CharStreams.fromString(code))
+        lexer.removeErrorListeners()
+        val tokenStream = CommonTokenStream(lexer)
+        val parser = getParser(tokenStream)
+        parser.removeErrorListeners()
+        val tree = getCompilationUnit(parser)
+        return AntlrParserResult(tree, parser, null)
+    }
+
+    abstract fun getErrorListener(): CollectedErrorListener
 
     override fun getLexerTokens(code: String): List<Int> {
         val lexer = getLexer(CharStreams.fromString(code))
@@ -26,20 +62,21 @@ abstract class AntlrAnalyzer : IRecoveryAnalyzer<Int> {
         return tokenStream.tokens.filter { it.type !in excludedTypes }.map { it.type }
     }
 
-    fun <ParserType : Parser> buildParser(code: String): ParserType {
+    fun buildParser(code: String): ParserType {
         val lexer = JavaLexer(CharStreams.fromString(code))
         lexer.removeErrorListeners()
         val tokenStream = CommonTokenStream(lexer)
-        val parser = getParser(tokenStream) as ParserType
+        val parser = getParser(tokenStream)
         parser.removeErrorListeners()
-        parser.addErrorListener(AntlrJava8Analyzer.ErrorListener())
+        parser.addErrorListener(getErrorListener())
         strategy = LoggingErrorStrategy()
         parser.errorHandler = strategy
         return parser
     }
 
-    data class AntlrParserResult(val tree: ParserRuleContext,
-                                 val parser: Parser, val listener: AntlrJava8Analyzer.ErrorListener? = null)
+    data class AntlrParserResult(
+        val tree: ParserRuleContext, val parser: Parser, val listener: CollectedErrorListener? = null
+    )
 
     override fun measureParse(code: String): Long {
         val lexer = JavaLexer(CharStreams.fromString(code))

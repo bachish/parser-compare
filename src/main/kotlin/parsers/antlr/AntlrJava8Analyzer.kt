@@ -1,74 +1,37 @@
 package parsers.antlr
 
-import antlr.java.JavaLexer
 import antlr.java8.Java8Lexer
 import antlr.java8.Java8Parser
-import measure.ErrorInfo
-import measure.ParseError
-import org.antlr.v4.runtime.*
+import org.antlr.v4.runtime.CodePointCharStream
+import org.antlr.v4.runtime.CommonTokenStream
+import org.antlr.v4.runtime.Lexer
+import org.antlr.v4.runtime.ParserRuleContext
+import parsers.CollectedErrorListener
 
 // Реализация для Java8 с использованием ANTLR
-class AntlrJava8Analyzer : AntlrAnalyzer() {
+class AntlrJava8Analyzer : AntlrAnalyzer<Java8Parser>() {
     override fun getLexer(code: CodePointCharStream): Lexer {
         return Java8Lexer(code)
     }
 
-    override fun <ParserType : Parser> getParser(tokenStream: CommonTokenStream): ParserType {
-        return Java8Parser(tokenStream) as ParserType
+    override fun getParser(tokenStream: CommonTokenStream): Java8Parser {
+        return Java8Parser(tokenStream)
     }
 
     override fun getExcludedTokens(): Set<Int> {
         return setOf(Java8Lexer.WS, Java8Lexer.COMMENT, Java8Lexer.LINE_COMMENT, Java8Lexer.EOF)
     }
 
-    override fun getParseTree(code: String): AntlrParserResult {
-        val lexer = JavaLexer(CharStreams.fromString(code))
-        lexer.removeErrorListeners()
-        val tokenStream = CommonTokenStream(lexer)
-        val parser = getParser(tokenStream) as Java8Parser
-        parser.removeErrorListeners()
-        val errorListener = AntlrJava8Analyzer.ErrorListener()
-        parser.addErrorListener(errorListener)
-        strategy = LoggingErrorStrategy()
-        parser.errorHandler = strategy
-        val tree = parser.compilationUnit()
-        return AntlrParserResult(tree, parser, errorListener)
+    override fun getCompilationUnit(parser: Java8Parser): ParserRuleContext {
+        return parser.compilationUnit()
     }
 
-    override fun getErrors(code: String): List<ErrorInfo> {
-        var parserResult = getParseTree(code)
-        val visitor = Visitor()
-        visitor.visit(parserResult.tree)
-        return parserResult.listener!!.syntaxErrors
-    }
+    override fun getErrorListener(): CollectedErrorListener = Java8ErrorListener()
 
-    class ErrorListener : BaseErrorListener() {
-        val syntaxErrors: MutableList<ErrorInfo> = mutableListOf()
-        override fun syntaxError(
-            recognizer: Recognizer<*, *>?,
-            offendingSymbol: Any?,
-            line: Int,
-            charPositionInLine: Int,
-            msg: String?,
-            e: RecognitionException?
-        ) {
-            super.syntaxError(recognizer, offendingSymbol, line, charPositionInLine, msg, e)
-            var errorType = ParseError.UNKNOWN
-            if (e != null) {
-                var expectedTokens = e.expectedTokens
-                if (expectedTokens.size() > 1) {
-                    errorType = ParseError.MORE_THAT_ONE_EXPECTED
-                } else {
-                    val expectedToken = expectedTokens.get(0)
-                    when (expectedToken) {
-                        Java8Lexer.SEMI -> ParseError.SEMICOLON_EXPECTED
-                        Java8Lexer.LBRACE -> ParseError.OPEN_BRACKET_EXPECTED
-                        Java8Lexer.ARROW -> ParseError.ARROW_EXPECTED
-                    }
-                }
-            }
-            syntaxErrors.add(ErrorInfo(errorType, msg, line, charPositionInLine))
-        }
+    class Java8ErrorListener : CollectedErrorListener() {
+        override fun getSemi(): Int = Java8Lexer.SEMI
+        override fun getLBrace(): Int = Java8Lexer.LBRACE
+        override fun getArrow(): Int = Java8Lexer.ARROW
     }
 
 }

@@ -1,5 +1,7 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    kotlin("jvm") version "2.0.20"
+    kotlin("jvm") version "2.2.0"
     application
 }
 
@@ -43,4 +45,13 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+
+tasks.test {
+    useJUnitPlatform()
+    jvmArgs(
+        "--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
+    )
 }

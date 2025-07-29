@@ -32,10 +32,10 @@ fun _main(args: Array<String>) {
 }
 
 fun measureErrors() {
-    val code = "clacc Main(){var x = 12 12 12}"
+    val code = "public class JavaParser extends Parser {void foo(){int x}}"
    // val code = "clacc Main(){}"
     var parser = ParserFactory.create(AnalyzerType.AntlrJava8Analyzer)
-    parser.getErrors(code)
+    print(parser.getErrors(code))
 
 }
 

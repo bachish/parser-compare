@@ -1,6 +1,7 @@
 package parsers
 
 import measure.ErrorInfo
+import parsers.antlr.AntlrAnalyzer.Visitor
 import parsers.antlr.AntlrJava8Analyzer
 import parsers.antlr.AntlrJavaAnalyzer
 import java.io.File
@@ -14,6 +15,7 @@ interface IRecoveryAnalyzer<TokenType> {
     fun getLexerTokens(code: String): List<TokenType>
     fun getParserTokens(code: String): List<TokenType>
     fun getErrors(code: String): List<ErrorInfo>
+
     fun calculateSimilarity(code: String): Double {
         val lexerTokens = getLexerTokens(code)
         val parserTokens = getParserTokens(code)
@@ -33,12 +35,6 @@ interface IRecoveryAnalyzer<TokenType> {
         }
     }
 
-    //    fun hollowParse(code: String) {
-//        getLexerTokens(code)
-//        getParserTokens(code)
-//    }
-//    fun hollowParse(file: File) = hollowParse(file.readText())
-    // Возвращает время парсинга в наносекундах, по умолчанию 0
     fun measureParse(file: File) = measureParse(file.readText())
     fun measureParse(code: String): Long = 0L
 

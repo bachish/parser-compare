@@ -725,10 +725,14 @@ fragment IdentifierStart:
     | [\uFFDA-\uFFDC]
     | [\uFFE0-\uFFE1]
     | [\uFFE5-\uFFE6]
+    | [a-z]
+    |[A-Z]
+    | '_'
 ;
 
 fragment IdentifierPart:
     IdentifierStart
+    | [0-9]
     | [\u0030-\u0039]
     | [\u007F-\u009F]
     | [\u00AD]
