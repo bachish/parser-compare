@@ -1,16 +1,18 @@
-
 package parsers.treesitter
 
-import parsers.IRecoveryAnalyzer
 import jflex.JavaScanner
 import jflex.JavaToken
 import jflex.TreeSitterLexer
 import measure.ErrorInfo
+import measure.ParseError
+import org.treesitter.TSLanguage
 import org.treesitter.TSNode
 import org.treesitter.TSParser
 import org.treesitter.TreeSitterJava
+import parsers.IRecoveryAnalyzer
 import java.io.StringReader
 import kotlin.system.measureNanoTime
+
 
 class TreeSitterAnalyzer() : IRecoveryAnalyzer<Int> {
     // Токены от лексера (JFlex Scanner)
@@ -37,7 +39,35 @@ class TreeSitterAnalyzer() : IRecoveryAnalyzer<Int> {
     }
 
     override fun getErrors(code: String): List<ErrorInfo> {
-        TODO("Not yet implemented")
+        val parser = TSParser()
+        val javaLang: TSLanguage = TreeSitterJava()
+        parser.setLanguage(javaLang)
+        val tree = parser.parseString(null, code)
+        val rootNode = tree.getRootNode()
+        val errorNodes = getErrorNodes(rootNode)
+        return errorNodes.map { getErrorInfo(it) }
+    }
+
+    private fun getErrorInfo(errorNode: TSNode): ErrorInfo {
+        if(errorNode.isMissing && errorNode.type == ";") {
+            return ErrorInfo(ParseError.SEMICOLON_EXPECTED)
+        }
+        return ErrorInfo(ParseError.UNKNOWN)
+
+    }
+
+    private fun getErrorNodes(node: TSNode): List<TSNode> {
+        val res = ArrayList<TSNode>()
+        for(i in 0..< node.childCount) {
+            val child = node.getChild(i)
+            if(child.isError || child.isMissing) {
+                res.add(child)
+            }
+            if(child.hasError()) {
+                res.addAll(getErrorNodes(child))
+            }
+        }
+        return res
     }
 
     // Вспомогательная функция для получения листьев дерева TreeSitter
@@ -47,32 +77,6 @@ class TreeSitterAnalyzer() : IRecoveryAnalyzer<Int> {
         val tree = parser.parseString(null, code)
         val leaves = mutableListOf<String>()
 
-
-//        // На файле с xml разметкой для логитека рекурсия падает со стак овервлоу((((
-//        // поэтому переделываем без рекурсии
-//        fun traverse(node: TSNode) {
-//            val stack = ArrayDeque<TSNode>()
-//            stack.addFirst(node)
-//
-//            while (stack.isNotEmpty()) {
-//                val current = stack.removeFirst()
-//
-//                if (current.childCount == 0) {
-//                    if (current.parent.isError) {
-//                        leaves.add("error")
-//                    } else {
-//                        leaves.add(current.type)
-//                    }
-//                }
-//
-//                // Добавляем дочерние узлы в обратном порядке,
-//                // чтобы обрабатывать их в прямом порядке
-//                for (i in current.childCount - 1 downTo 0) {
-//                    stack.addFirst(current.getChild(i)!!)
-//                }
-//            }
-//        }
-//
 
         fun traverse(node: TSNode) {
             if (node.childCount == 0) {
@@ -104,42 +108,4 @@ class TreeSitterAnalyzer() : IRecoveryAnalyzer<Int> {
             sink += tree.hashCode() % 10
         }
     }
-}
-// Пример использования
-fun main() {
-    val analyzer = TreeSitterAnalyzer()
-//    val analyzer = AntlrJavaAnalyzer()
-//    val code = """
-//        @interface MyAnnotation {}
-//        public class Test {
-//            public static void main(String[] args) {
-//                System.out.println("Hello World!");
-//            }
-//
-//    """.trimIndent()
-
-    // not a statement?
-    val missingId = """
-int main(){
-    a+ b +; }}"""
-
-    val errorDeleted = """
-int main(){}}}
-   """
-
-    val code = """
-public class Test {
-    public static void main(String[] args) {{{{{
-        System.out.println("Hello World!");
-    }
-}
-"""
-
-    val lexerTokens = analyzer.getLexerTokens(code)
-    val parserTokens = analyzer.getParserTokens(code)
-
-    println("code: $code")
-    println("Lexer Tokens (JFlex): $lexerTokens")
-    println("Parser Tokens (Tree-sitter): $parserTokens")
-    println("Similarity: ${analyzer.calculateSimilarity(code)}")
 }
