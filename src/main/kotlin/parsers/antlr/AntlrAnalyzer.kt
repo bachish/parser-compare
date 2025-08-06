@@ -78,10 +78,9 @@ abstract class AntlrAnalyzer<ParserType : Parser> : IRecoveryAnalyzer<Int, Parse
 
     abstract fun getCompilationUnit(parser: ParserType): ParserRuleContext
 
-    fun getParsedTree(code: String): ParseTree {
+    override fun getParseTree(code: String): ParseTree {
         return getParseResult(code).tree
     }
-
     fun getParseResult(code: String): AntlrParserResult {
         val lexer = getLexer(CharStreams.fromString(code))
         lexer.removeErrorListeners()
