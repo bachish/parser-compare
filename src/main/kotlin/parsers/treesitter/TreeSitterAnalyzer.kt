@@ -5,6 +5,9 @@ import jflex.JavaToken
 import jflex.TreeSitterLexer
 import measure.ErrorInfo
 import measure.ParseError
+import org.jgrapht.Graph
+import org.jgrapht.graph.DefaultEdge
+import org.jgrapht.graph.SimpleGraph
 import org.treesitter.TSLanguage
 import org.treesitter.TSNode
 import org.treesitter.TSParser
@@ -14,8 +17,8 @@ import java.io.StringReader
 import kotlin.system.measureNanoTime
 
 
-class TreeSitterAnalyzer() : IRecoveryAnalyzer<Int> {
-    // Токены от лексера (JFlex Scanner)
+class TreeSitterAnalyzer : IRecoveryAnalyzer<Int, TSNode> {
+    var source: String = ""
     override fun getLexerTokens(code: String): List<Int> {
         val scanner = JavaScanner(StringReader(code))
         val tokens = mutableListOf<Int>()
@@ -39,18 +42,18 @@ class TreeSitterAnalyzer() : IRecoveryAnalyzer<Int> {
     }
 
     override fun getErrors(code: String): List<ErrorInfo> {
-        val parser = TSParser()
-        val javaLang: TSLanguage = TreeSitterJava()
-        parser.setLanguage(javaLang)
-        val tree = parser.parseString(null, code)
-        val rootNode = tree.getRootNode()
+        val rootNode = getParseTree(code)
         val errorNodes = getErrorNodes(rootNode)
         return errorNodes.map { getErrorInfo(it) }
     }
 
     private fun getErrorInfo(errorNode: TSNode): ErrorInfo {
-        if(errorNode.isMissing && errorNode.type == ";") {
-            return ErrorInfo(ParseError.SEMICOLON_EXPECTED)
+        if (errorNode.isMissing) {
+            val error = when (errorNode.type) {
+                ";" -> ParseError.SEMICOLON_EXPECTED
+                else -> throw IllegalStateException("new missing node type!")
+            }
+            return ErrorInfo(error)
         }
         return ErrorInfo(ParseError.UNKNOWN)
 
@@ -58,12 +61,12 @@ class TreeSitterAnalyzer() : IRecoveryAnalyzer<Int> {
 
     private fun getErrorNodes(node: TSNode): List<TSNode> {
         val res = ArrayList<TSNode>()
-        for(i in 0..< node.childCount) {
+        for (i in 0..<node.childCount) {
             val child = node.getChild(i)
-            if(child.isError || child.isMissing) {
+            if (child.isError || child.isMissing) {
                 res.add(child)
             }
-            if(child.hasError()) {
+            if (child.hasError()) {
                 res.addAll(getErrorNodes(child))
             }
         }
@@ -95,17 +98,79 @@ class TreeSitterAnalyzer() : IRecoveryAnalyzer<Int> {
         traverse(tree.rootNode)
         return leaves.joinToString(" ")
     }
-    var parser:TSParser = TSParser()
-    var sink:Int = 0
 
-    init {
-        parser.setLanguage(TreeSitterJava())
+    override fun getParseTree(code: String): TSNode {
+        source = code
+        val parser = TSParser()
+        val javaLang: TSLanguage = TreeSitterJava()
+        parser.setLanguage(javaLang)
+        val tree = parser.parseString(null, code)
+        return tree.rootNode
     }
+
+
+    private var sink: Int = 0
+
 
     override fun measureParse(code: String): Long {
         return measureNanoTime {
-            val tree = parser.parseString(null, code)
+            val tree = getParseTree(code)
             sink += tree.hashCode() % 10
         }
     }
+
+    override fun equals(node1: TSNode, node2: TSNode): Boolean {
+        if (node1 === node2) return true
+        if (node1.type != node2.type) return false
+        if (node1.grammarType != node2.grammarType) return false
+        if (node1.isError != node2.isExtra) return false
+        if (node1.childCount != node2.childCount) return false
+        if (isJavaIdentifierOrLiteral(node1.type)) {
+            val text1 = getNodeText(node1, source)
+            val text2 = getNodeText(node2, source)
+            if (text1 != text2) return false
+        }
+        // If node is identifier or literal, compare text too
+
+
+        return true
+    }
+
+    private fun isJavaIdentifierOrLiteral(nodeType: String): Boolean {
+        return nodeType == "identifier" || nodeType == "decimal_integer_literal" || nodeType == "string_literal" || nodeType == "character_literal" || nodeType == "floating_point_literal"
+    }
+
+    private fun getNodeText(node: TSNode, source: String): String {
+        val bytes = source.toByteArray(Charsets.UTF_8)
+        val start = node.startByte
+        val end = node.endByte
+        return bytes.copyOfRange(start, end).toString(Charsets.UTF_8)
+    }
+
+    override fun getGraphFromTree(code: String): Pair<Graph<TSNode, DefaultEdge>, TSNode> {
+        val graph: Graph<TSNode, DefaultEdge> = SimpleGraph(
+            DefaultEdge::class.java
+        )
+        val rootNode = getParseTree(code)
+        traverse(rootNode, null, graph)
+        return Pair(graph, rootNode)
+    }
+
+
+    private fun traverse(
+        node: TSNode, parent: TSNode?, graph: Graph<TSNode, DefaultEdge>
+    ) {
+        graph.addVertex(node)
+        if (parent != null) {
+            graph.addEdge(parent, node)
+        }
+
+        for (i in 0..<node.childCount) {
+            val child = node.getChild(i)
+            if (child is TSNode) {
+                traverse(child, node, graph)
+            }
+        }
+    }
+
 }

@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 
 class TestAntlrErrorCollector : IErrorCollectorTest{
 
-    override fun getParser(): IRecoveryAnalyzer<*> = ParserFactory.create(AnalyzerType.AntlrJavaAnalyzer)
+    override fun getParser(): IRecoveryAnalyzer<*, *> = ParserFactory.create(AnalyzerType.AntlrJavaAnalyzer)
 
     @Test
     fun testJAva8ErrorCollector() {
@@ -16,12 +16,22 @@ class TestAntlrErrorCollector : IErrorCollectorTest{
         collectJavaError(missingArrow, ParseError.ARROW_EXPECTED)
     }
 
-    @Disabled
-    fun testOne() {
+    @Test
+    fun testBadRecovery() {
         // find more than one expected
-        collectJavaError(missingOpenBracket, ParseError.OPEN_BRACKET_EXPECTED)
-        //15 different tokens expected!
-        collectJavaError(notAStatement, ParseError.NOT_A_STATEMENT)
+        collectJavaError(missingOpenBracket, ParseError.MORE_THAT_ONE_EXPECTED)
     }
 
+    @Test
+    fun testCantDetect(){
+        assertNoError(notAStatement)
+
+    }
+    @Test
+    fun testAntlrTed(){
+        val analyzer = getParser()
+        assertEquals(0.0, analyzer.getTreeEditDistance(correctCode, correctCode))
+        assertEquals(1.0, analyzer.getTreeEditDistance("class Main{}", "class Foo{}"))
+        assertEquals(4.0, analyzer.getTreeEditDistance("class Main {int x = 12}", "class Main {int x = 12};"))
+    }
 }

@@ -4,27 +4,37 @@ import org.junit.jupiter.api.Test
 import parsers.AnalyzerType
 import parsers.IRecoveryAnalyzer
 import parsers.ParserFactory
+import kotlin.test.assertEquals
 
 class TestTreeSitterErrorCollector : IErrorCollectorTest{
 
-    override fun getParser(): IRecoveryAnalyzer<*> = ParserFactory.create(AnalyzerType.TreeSitterAnalyzer)
+    override fun getParser() = ParserFactory.create(AnalyzerType.TreeSitterAnalyzer)
 
     @Test
     fun testJava8ErrorCollector() {
-        collectJavaError(identifierExpected, ParseError.SEMICOLON_EXPECTED)
-        collectJavaError(missingOpenBracket, ParseError.OPEN_BRACKET_EXPECTED)
-        collectJavaError(notAStatement, ParseError.NOT_A_STATEMENT)
+        collectJavaError(missingSemicolon, ParseError.SEMICOLON_EXPECTED)
     }
 
 
-    @Disabled
-    fun testOne() {
-        // some strange error
-        collectJavaError(missingArrow, ParseError.ARROW_EXPECTED)
-
-        //15 different tokens expected!
-        collectJavaError(notAStatement, ParseError.NOT_A_STATEMENT)
+    @Test
+    fun testBadDetection() {
+        collectJavaError(identifierExpected, ParseError.UNKNOWN)
+        collectJavaError(missingOpenBracket, ParseError.UNKNOWN)
+        collectJavaError(missingArrow, ParseError.UNKNOWN)
     }
 
+    @Test
+    fun testMissingError(){
+        assertNoError(notAStatement)
+    }
+
+
+    @Test
+    fun testTed(){
+        val analyzer = getParser()
+        assertEquals(0.0, analyzer.getTreeEditDistance(correctCode, correctCode))
+        assertEquals(1.0, analyzer.getTreeEditDistance("class Main{}", "class Foo{}"))
+        assertEquals(2.0, analyzer.getTreeEditDistance("class Main {int x = 12}", "class Main {int x = 12};"))
+    }
 
 }

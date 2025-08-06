@@ -3,17 +3,16 @@ package parsers.antlr
 import antlr.java.JavaLexer
 import measure.ErrorInfo
 import org.antlr.v4.runtime.*
-import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor
-import org.antlr.v4.runtime.tree.ErrorNode
-import org.antlr.v4.runtime.tree.RuleNode
-import org.antlr.v4.runtime.tree.TerminalNode
-import parsers.CollectedErrorListener
+import org.antlr.v4.runtime.tree.*
+import org.jgrapht.Graph
+import org.jgrapht.graph.DefaultEdge
+import org.jgrapht.graph.SimpleGraph
 import parsers.IRecoveryAnalyzer
 import kotlin.system.measureNanoTime
 
 // Реализация для Java с использованием ANTLR (токены как пара текст-тип)
-abstract class AntlrAnalyzer<ParserType : Parser> : IRecoveryAnalyzer<Int> {
-    protected var strategy: LoggingErrorStrategy? = null
+abstract class AntlrAnalyzer<ParserType : Parser> : IRecoveryAnalyzer<Int, ParseTree> {
+    private var strategy: LoggingErrorStrategy? = null
     abstract fun getLexer(code: CodePointCharStream): Lexer
     abstract fun getParser(tokens: CommonTokenStream): ParserType
     abstract fun getExcludedTokens(): Set<Int>
@@ -25,7 +24,7 @@ abstract class AntlrAnalyzer<ParserType : Parser> : IRecoveryAnalyzer<Int> {
         return parserResult.listener!!.syntaxErrors
     }
 
-    fun getParseTreeWithErrors(code: String): AntlrParserResult {
+    private fun getParseTreeWithErrors(code: String): AntlrParserResult {
         val lexer = getLexer(CharStreams.fromString(code))
         lexer.removeErrorListeners()
         val tokenStream = CommonTokenStream(lexer)
@@ -39,9 +38,51 @@ abstract class AntlrAnalyzer<ParserType : Parser> : IRecoveryAnalyzer<Int> {
         return AntlrParserResult(tree, parser, errorListener)
     }
 
+    override fun equals(node1: ParseTree, node2: ParseTree): Boolean {
+        if (node1 === node2) return true
+        if (node1 is TerminalNode && node2 is TerminalNode) {
+            return node1.text == node2.text
+        }
+        if (node1 is TerminalNode || node2 is TerminalNode) {
+            return false
+        }
+        if (node1 is ParserRuleContext && node2 is ParserRuleContext) {
+            if (node1.ruleIndex != node2.ruleIndex) return false
+        }
+        if (node1.childCount != node2.childCount) return false
+        return true
+    }
+
+    override fun getGraphFromTree(code: String): Pair<Graph<ParseTree, DefaultEdge>, ParseTree> {
+        val graph: Graph<ParseTree, DefaultEdge> = SimpleGraph(
+            DefaultEdge::class.java
+        )
+        val (treeRoot, _, _) = getParseResult(code)
+        traverse(treeRoot, null, graph)
+        return Pair(graph, treeRoot)
+    }
+
+    private fun traverse(
+        node: ParseTree, parent: ParseTree?, graph: Graph<ParseTree, DefaultEdge>
+    ) {
+        graph.addVertex(node)
+        if (parent != null) {
+            graph.addEdge(parent, node)
+        }
+
+        for (i in 0..<node.childCount) {
+            val child = node.getChild(i)
+            traverse(child, node, graph)
+        }
+    }
+
     abstract fun getCompilationUnit(parser: ParserType): ParserRuleContext
 
-    fun getParseTree(code: String): AntlrParserResult {
+    fun getParsedTree(code: String): ParseTree {
+        return getParseResult(code).tree
+    }
+
+    fun getParseResult(code: String): AntlrParserResult {
         val lexer = getLexer(CharStreams.fromString(code))
         lexer.removeErrorListeners()
         val tokenStream = CommonTokenStream(lexer)
@@ -82,12 +123,12 @@ abstract class AntlrAnalyzer<ParserType : Parser> : IRecoveryAnalyzer<Int> {
         val lexer = JavaLexer(CharStreams.fromString(code))
         lexer.removeErrorListeners()
         return measureNanoTime {
-            getParseTree(code)
+            getParseResult(code)
         }
     }
 
     override fun getParserTokens(code: String): List<Int> {
-        val parseTree = getParseTree(code).tree
+        val parseTree = getParseResult(code).tree
         val visitor = Visitor()
         visitor.visit(parseTree)
 
@@ -98,7 +139,7 @@ abstract class AntlrAnalyzer<ParserType : Parser> : IRecoveryAnalyzer<Int> {
     }
 
     class LoggingErrorStrategy : DefaultErrorStrategy() {
-        val extraTokens = mutableListOf<Token>()
+        private val extraTokens = mutableListOf<Token>()
 
         override fun reportUnwantedToken(recognizer: Parser) {
             // Получение текущего "лишнего" токена
@@ -110,7 +151,7 @@ abstract class AntlrAnalyzer<ParserType : Parser> : IRecoveryAnalyzer<Int> {
 
     class Visitor : AbstractParseTreeVisitor<Int>() {
         val collectedTokens = mutableListOf<Token>()
-        val errorTokens = mutableListOf<Token>()
+        private val errorTokens = mutableListOf<Token>()
 
         override fun visitTerminal(node: TerminalNode): Int {
             collectedTokens.add(node.symbol)

@@ -7,7 +7,7 @@ import parsers.jdt.JDTAnalyzer
 import parsers.treesitter.TreeSitterAnalyzer
 
 object ParserFactory {
-    fun create(analyzerType: AnalyzerType): IRecoveryAnalyzer<*> {
+    fun create(analyzerType: AnalyzerType): IRecoveryAnalyzer<*, *> {
         return when (analyzerType) {
             AnalyzerType.AntlrJava8Analyzer -> AntlrJava8Analyzer()
             AnalyzerType.AntlrJavaAnalyzer -> AntlrJavaAnalyzer()
@@ -17,7 +17,7 @@ object ParserFactory {
         }
     }
 
-    fun create(analyzerTypeView: String): IRecoveryAnalyzer<*> {
+    fun create(analyzerTypeView: String): IRecoveryAnalyzer<*, *> {
         val analyzerType = runCatching { AnalyzerType.valueOf(analyzerTypeView) }.getOrElse {
             throw IllegalArgumentException("Unknown analyzer type: $analyzerTypeView")
         }

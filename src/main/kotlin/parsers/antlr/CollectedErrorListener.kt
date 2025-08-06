@@ -1,4 +1,4 @@
-package parsers
+package parsers.antlr
 
 import measure.ErrorInfo
 import measure.ParseError

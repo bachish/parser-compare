@@ -3,5 +3,5 @@ package measure
 import parsers.IRecoveryAnalyzer
 
 interface IMeasurer {
-    fun <T> measure(analyzer: IRecoveryAnalyzer<T>, inputDirectory: String, outputCsvFile: String)
+    fun <T, N> measure(analyzer: IRecoveryAnalyzer<T, N>, inputDirectory: String, outputCsvFile: String)
 }
