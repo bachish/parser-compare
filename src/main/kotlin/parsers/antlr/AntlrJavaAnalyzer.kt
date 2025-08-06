@@ -6,7 +6,6 @@ import org.antlr.v4.runtime.CodePointCharStream
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.Lexer
 import org.antlr.v4.runtime.ParserRuleContext
-import parsers.CollectedErrorListener
 
 class AntlrJavaAnalyzer : AntlrAnalyzer<JavaParser>() {
     override fun getLexer(code: CodePointCharStream): Lexer {
@@ -34,6 +33,5 @@ class AntlrJavaAnalyzer : AntlrAnalyzer<JavaParser>() {
         override fun getLBrace(): Int = JavaLexer.LBRACE
         override fun getArrow(): Int = JavaLexer.ARROW
     }
-
 }
 

@@ -1,21 +1,24 @@
 package parsers
 
 import measure.ErrorInfo
-import parsers.antlr.AntlrAnalyzer.Visitor
-import parsers.antlr.AntlrJava8Analyzer
-import parsers.antlr.AntlrJavaAnalyzer
+import org.jgrapht.Graph
+import org.jgrapht.alg.similarity.ZhangShashaTreeEditDistance
+import org.jgrapht.graph.DefaultEdge
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.math.max
 import kotlin.math.min
 
-// Интерфейс для анализа кода (T - тип токенов)
-interface IRecoveryAnalyzer<TokenType> {
+/**
+ * TokenType -- type of tokens (leafs types)
+ * NodeType -- type of AST nodes
+ */
+interface IRecoveryAnalyzer<TokenType, NodeType> {
     fun getLexerTokens(code: String): List<TokenType>
     fun getParserTokens(code: String): List<TokenType>
     fun getErrors(code: String): List<ErrorInfo>
-
+    fun getParseTree(code: String): NodeType
     fun calculateSimilarity(code: String): Double {
         val lexerTokens = getLexerTokens(code)
         val parserTokens = getParserTokens(code)
@@ -37,6 +40,30 @@ interface IRecoveryAnalyzer<TokenType> {
 
     fun measureParse(file: File) = measureParse(file.readText())
     fun measureParse(code: String): Long = 0L
+
+
+    fun getTreeEditDistance(code1: String, code2: String): Double {
+        val insertCost = 1.0
+        val removeCost = 1.0
+        val replaceCost = 1.0
+        val (graph1, root1) = getGraphFromTree(code1)
+        val (graph2, root2) = getGraphFromTree(code2)
+        val ted = ZhangShashaTreeEditDistance(
+            graph1, root1,
+            graph2, root2,
+            { _ -> insertCost },
+            { _ -> removeCost },
+            { n1: NodeType, n2: NodeType ->
+                if (equals(n1, n2)) 0.0
+                else replaceCost
+            }
+        )
+        return ted.distance
+    }
+
+    fun equals(node1: NodeType, node2: NodeType) : Boolean
+
+    fun getGraphFromTree(code: String): Pair<Graph<NodeType, DefaultEdge>, NodeType>
 
 }
 
@@ -70,16 +97,4 @@ object LevenshteinUtils {
     }
 
     // todo("квадратичное добавить")
-}
-
-
-
-
-fun main() {
-    val javaAnalyzer = AntlrJavaAnalyzer()
-    val java8Analyzer = AntlrJava8Analyzer()
-    val code = "class Test { void method(){ int x; x; } }" // not.stmt
-
-    println("Java Similarity: ${javaAnalyzer.calculateSimilarity(code)}")
-    println("Java8 Similarity: ${java8Analyzer.calculateSimilarity(code)}")
 }

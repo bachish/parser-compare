@@ -6,7 +6,8 @@ enum class ParseError {
     OPEN_BRACKET_EXPECTED,
     ARROW_EXPECTED,
     UNKNOWN,
-    MORE_THAT_ONE_EXPECTED
+    MORE_THAT_ONE_EXPECTED,
+    IDENTIFIER_EXPECTED
 }
 
 fun String.parseErrorMessages(): Set<ParseError> = lineSequence()

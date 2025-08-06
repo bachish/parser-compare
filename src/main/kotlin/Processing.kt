@@ -6,10 +6,10 @@ import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import me.tongfei.progressbar.ProgressBar
 
-fun <T> processFiles(
+fun <Token, Node> processFiles(
     directoryPath: String,
     outputCsvPath: String,
-    analyzer: IRecoveryAnalyzer<T>,
+    analyzer: IRecoveryAnalyzer<Token, Node>,
     maxFiles: Int = Int.MAX_VALUE,
     append: Boolean = true
 ) {
@@ -65,14 +65,3 @@ fun <T> processFiles(
     println("Processing complete. Results written to $outputCsvPath")
 }
 
-fun main() {
-
-    val analyzer = JDTAnalyzer()
-    processFiles(
-        directoryPath = "C:\\data\\java_src_files",
-        outputCsvPath = "C:\\data\\${analyzer::class.simpleName}_all_scores.csv",
-        analyzer = analyzer,
-//        maxFiles = 50,
-        append = true
-    )
-}

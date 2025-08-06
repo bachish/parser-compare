@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.CodePointCharStream
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.Lexer
 import org.antlr.v4.runtime.ParserRuleContext
-import parsers.CollectedErrorListener
+
 
 // Реализация для Java8 с использованием ANTLR
 class AntlrJava8Analyzer : AntlrAnalyzer<Java8Parser>() {
@@ -14,8 +14,8 @@ class AntlrJava8Analyzer : AntlrAnalyzer<Java8Parser>() {
         return Java8Lexer(code)
     }
 
-    override fun getParser(tokenStream: CommonTokenStream): Java8Parser {
-        return Java8Parser(tokenStream)
+    override fun getParser(tokens: CommonTokenStream): Java8Parser {
+        return Java8Parser(tokens)
     }
 
     override fun getExcludedTokens(): Set<Int> {

@@ -8,11 +8,13 @@ import measure.ErrorInfo
 import org.eclipse.jdt.core.dom.AST
 import org.eclipse.jdt.core.dom.ASTParser
 import org.eclipse.jdt.core.dom.CompilationUnit
+import org.jgrapht.Graph
+import org.jgrapht.graph.DefaultEdge
 import java.io.File
 import java.io.StringReader
 import kotlin.system.measureNanoTime
 
-class JDTAnalyzer : IRecoveryAnalyzer<Int> {
+class JDTAnalyzer : IRecoveryAnalyzer<Int, Void> {
     // 1. Токены от лексера (JFlex Scanner) для исходного кода
     override fun getLexerTokens(code: String): List<Int> {
         val scanner = JavaScanner(StringReader(code))
@@ -53,6 +55,10 @@ class JDTAnalyzer : IRecoveryAnalyzer<Int> {
         TODO("Not yet implemented")
     }
 
+    override fun getParseTree(code: String): Void {
+        TODO("Not yet implemented")
+    }
+
     override fun measureParse(code: String): Long {
         val parser = ASTParser.newParser(AST.JLS21)
         parser.setSource(code.toCharArray())
@@ -60,6 +66,14 @@ class JDTAnalyzer : IRecoveryAnalyzer<Int> {
         return measureNanoTime {
             val cu = parser.createAST(null) as CompilationUnit
         }
+    }
+
+    override fun equals(node1: Void, node2: Void): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun getGraphFromTree(code: String): Pair<Graph<Void, DefaultEdge>, Void> {
+        TODO("Not yet implemented")
     }
 }
 

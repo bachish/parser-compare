@@ -12,15 +12,15 @@ class ParsingTimeMeasurer : IMeasurer {
     private val maxFiles: Int = Int.MAX_VALUE
     private val append: Boolean = true
 
-    override fun <T> measure(analyzer: IRecoveryAnalyzer<T>, inputDirectory: String, outputCsvPath: String) {
-        val files = getFiles(inputDirectory, outputCsvPath)
+    override fun <T, N> measure(analyzer: IRecoveryAnalyzer<T, N>, inputDirectory: String, outputCsvFile: String) {
+        val files = getFiles(inputDirectory, outputCsvFile)
         warmupJvm(files, analyzer)
 
-        val file = File(outputCsvPath)
+        val file = File(outputCsvFile)
         val isNewFile = !file.exists() || file.length() == 0L
 
         val writer = Files.newBufferedWriter(
-            Paths.get(outputCsvPath),
+            Paths.get(outputCsvFile),
             if (append && file.exists()) StandardOpenOption.APPEND else StandardOpenOption.CREATE
         ).apply {
             if (isNewFile) append("fileName,parsingTimeNanos\n")
@@ -39,7 +39,7 @@ class ParsingTimeMeasurer : IMeasurer {
                 }
             }
         }
-        println("Results written to $outputCsvPath")
+        println("Results written to $outputCsvFile")
     }
 
     private fun getFiles(inputDirectory: String, outputCsvPath: String): List<File> {
@@ -53,7 +53,7 @@ class ParsingTimeMeasurer : IMeasurer {
         }?.take(maxFiles) ?: emptyList()
     }
 
-    private fun <T> warmupJvm(files: List<File>, analyzer: IRecoveryAnalyzer<T>) {
+    private fun <T, N> warmupJvm(files: List<File>, analyzer: IRecoveryAnalyzer<T, N>) {
         println("Starting JVM warmup...")
         files.shuffled().take(warmupFilesCount).forEach { analyzer.measureParse(it) }
         println("JVM warmup complete.")

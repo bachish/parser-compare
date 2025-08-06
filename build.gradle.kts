@@ -19,6 +19,15 @@ dependencies {
     implementation("guru.nidi:graphviz-java:0.18.1")
 
     implementation("org.eclipse.jdt:org.eclipse.jdt.core:3.40.0")
+    // for tree edit distance comparing
+    // https://mvnrepository.com/artifact/org.jgrapht/jgrapht-core
+    implementation("org.jgrapht:jgrapht-core:1.5.2")
+    implementation("org.jgrapht:jgrapht-ext:1.5.2")
+
+    implementation("io.github.bonede:tree-sitter:0.25.3")
+    implementation("io.github.bonede:tree-sitter-java:0.23.4")
+    // https://mvnrepository.com/artifact/org.jgrapht/jgrapht-io
+    implementation("org.jgrapht:jgrapht-io:1.5.2")
 }
 
 tasks.test {
@@ -52,6 +61,7 @@ tasks.test {
     useJUnitPlatform()
     jvmArgs(
         "--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
-        "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED"
-    )
+        "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+        "--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",
+        )
 }
