@@ -1,3 +1,5 @@
+package runners
+
 import parsers.AnalyzerType
 import parsers.ParserFactory
 import parsers.treesitter.TreeSitterAnalyzer

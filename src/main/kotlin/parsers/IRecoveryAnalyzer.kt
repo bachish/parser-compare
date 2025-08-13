@@ -27,6 +27,14 @@ interface IRecoveryAnalyzer<TokenType, NodeType> {
         return if (maxLength > 0) 1 - (distance.toDouble() / maxLength) else 1.0
     }
 
+    fun calculateSimilarity(correctCode: String, brockenCode: String): Double {
+        val lexerTokens = getParserTokens(correctCode)
+        val parserTokens = getParserTokens(brockenCode)
+        val distance = LevenshteinUtils.levenshteinLine(lexerTokens, parserTokens)
+        val maxLength = max(lexerTokens.size, parserTokens.size)
+        return if (maxLength > 0) 1 - (distance.toDouble() / maxLength) else 1.0
+    }
+
     fun calculateSimilarity(file: File): Double {
         val code = Files.readString(Paths.get(file.absolutePath))
         try {

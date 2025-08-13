@@ -7,6 +7,12 @@ import com.sun.source.util.JavacTask
 import com.sun.source.util.TreeScanner
 import com.sun.tools.javac.api.ClientCodeWrapper
 import com.sun.tools.javac.api.JavacTool
+import com.sun.tools.javac.parser.Scanner
+import com.sun.tools.javac.parser.ScannerFactory
+import com.sun.tools.javac.parser.Tokens
+import com.sun.tools.javac.util.Context
+import com.sun.tools.javac.util.Log
+import com.sun.tools.javac.util.Options
 import measure.ErrorInfo
 import measure.ParseError
 import org.jgrapht.Graph
@@ -17,6 +23,7 @@ import parsers.IRecoveryAnalyzer
 import java.io.File
 import java.io.StringWriter
 import java.net.URI
+import java.nio.charset.StandardCharsets
 import javax.tools.*
 import kotlin.system.measureNanoTime
 

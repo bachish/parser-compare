@@ -1,5 +1,7 @@
 package measure
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class ParseError {
     NOT_A_STATEMENT,
     SEMICOLON_EXPECTED,
