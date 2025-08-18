@@ -1,7 +1,8 @@
-import measure.ParseError
+import measure.MISSING_ARROW
+import measure.MISSING_OPEN_BRACKET
+import measure.MISSING_SEMICOLON
 import org.junit.jupiter.api.Test
 import parsers.AnalyzerType
-import parsers.IRecoveryAnalyzer
 import parsers.ParserFactory
 import kotlin.test.assertEquals
 
@@ -12,10 +13,9 @@ class TestJavacErrorCollector : IErrorCollectorTest {
 
     @Test
     fun testCollectableError() {
-        collectJavaError(missingSemicolon, ParseError.SEMICOLON_EXPECTED)
-        collectJavaError(missingArrow, ParseError.ARROW_EXPECTED)
-        collectJavaError(missingOpenBracket, ParseError.OPEN_BRACKET_EXPECTED)
-        collectJavaError(notAStatement, ParseError.NOT_A_STATEMENT)
+        collectJavaError(missingSemicolon, MISSING_SEMICOLON)
+        collectJavaError(missingArrow, MISSING_ARROW)
+        collectJavaError(missingOpenBracket, MISSING_OPEN_BRACKET)
     }
 
     @Test

@@ -1,7 +1,6 @@
 package parsers.antlr
 
-import measure.ErrorInfo
-import measure.ParseError
+import measure.*
 import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.Parser
 import org.antlr.v4.runtime.RecognitionException
@@ -22,21 +21,21 @@ abstract class CollectedErrorListener: BaseErrorListener() {
         e: RecognitionException?
     ) {
         super.syntaxError(recognizer, offendingSymbol, line, charPositionInLine, msg, e)
-        var expectedTokens: IntervalSet = (recognizer as Parser).getExpectedTokens()
+        var expectedTokens: IntervalSet = (recognizer as Parser).expectedTokens
         if(e != null) {
             expectedTokens = e.expectedTokens
         }
-        var errorType = ParseError.UNKNOWN
+        var errorType = UNKNOWN_ERROR
         if (expectedTokens.size() != 0) {
             if (expectedTokens.size() > 1) {
-                errorType = ParseError.MORE_THAT_ONE_EXPECTED
+                errorType = UNKNOWN_ERROR
             } else {
                 val expectedToken = expectedTokens.get(0)
                 errorType = when (expectedToken) {
-                    getSemi() -> ParseError.SEMICOLON_EXPECTED
-                    getLBrace() -> ParseError.OPEN_BRACKET_EXPECTED
-                    getArrow() -> ParseError.ARROW_EXPECTED
-                    else -> ParseError.UNKNOWN
+                    getSemi() -> MISSING_SEMICOLON
+                    getLBrace() -> MISSING_OPEN_BRACKET
+                    getArrow() -> MISSING_ARROW
+                    else -> UNKNOWN_ERROR
                 }
             }
         }

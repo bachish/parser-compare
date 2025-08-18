@@ -15,6 +15,8 @@ import com.sun.tools.javac.util.Log
 import com.sun.tools.javac.util.Options
 import measure.ErrorInfo
 import measure.ParseError
+import measure.ParseErrorType
+import measure.UNKNOWN_ERROR
 import org.jgrapht.Graph
 import org.jgrapht.graph.DefaultEdge
 import org.jgrapht.graph.SimpleGraph
@@ -82,26 +84,16 @@ class JavacAnalyzer : IRecoveryAnalyzer<String, Tree> {
                     "compiler.err.expected" -> {
                         val args = diagnostic.d.args
                         if (args.size != 1) {
-                            return ErrorInfo(ParseError.UNKNOWN)
+                            return ErrorInfo(UNKNOWN_ERROR)
                         }
-                        val arg = args[0].toString()
-                        when (arg) {
-                            "';'" -> ErrorInfo(ParseError.SEMICOLON_EXPECTED, diagnostic.getMessage(null))
-                            "'{'" -> ErrorInfo(ParseError.OPEN_BRACKET_EXPECTED, diagnostic.getMessage(null))
-                            "->" -> ErrorInfo(ParseError.ARROW_EXPECTED, diagnostic.getMessage(null))
-                            else -> ErrorInfo(ParseError.UNKNOWN, diagnostic.getMessage(null))
-                        }
+                        val arg = args[0].toString().replace("'", "")
+                        ErrorInfo(ParseError(ParseErrorType.REMOVED_TOKEN, arg))
                     }
-
-                    "compiler.err.not.stmt" -> {
-                        ErrorInfo(ParseError.NOT_A_STATEMENT, diagnostic.getMessage(null))
-                    }
-
-                    else -> ErrorInfo(ParseError.UNKNOWN)
+                    else -> ErrorInfo(UNKNOWN_ERROR)
                 }
             }
 
-            else -> ErrorInfo(ParseError.UNKNOWN)
+            else -> ErrorInfo(UNKNOWN_ERROR)
         }
     }
 

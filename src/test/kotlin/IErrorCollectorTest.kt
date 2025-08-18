@@ -9,7 +9,7 @@ interface IErrorCollectorTest {
         var parser = getParser()
         val errors = parser.getErrors(code)
         assertEquals(1, errors.size)
-        assertEquals(error, errors.get(0).type)
+        assertEquals(error, errors[0].type)
     }
 
     fun assertNoError(code: String) {

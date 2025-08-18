@@ -4,7 +4,8 @@ import jflex.JavaScanner
 import jflex.JavaToken
 import jflex.TreeSitterLexer
 import measure.ErrorInfo
-import measure.ParseError
+import measure.MISSING_SEMICOLON
+import measure.UNKNOWN_ERROR
 import org.jgrapht.Graph
 import org.jgrapht.graph.DefaultEdge
 import org.jgrapht.graph.SimpleGraph
@@ -50,12 +51,12 @@ class TreeSitterAnalyzer : IRecoveryAnalyzer<Int, TSNode> {
     private fun getErrorInfo(errorNode: TSNode): ErrorInfo {
         if (errorNode.isMissing) {
             val error = when (errorNode.type) {
-                ";" -> ParseError.SEMICOLON_EXPECTED
+                ";" -> MISSING_SEMICOLON
                 else -> throw IllegalStateException("new missing node type!")
             }
             return ErrorInfo(error)
         }
-        return ErrorInfo(ParseError.UNKNOWN)
+        return ErrorInfo(UNKNOWN_ERROR)
 
     }
 

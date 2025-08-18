@@ -1,6 +1,5 @@
-import measure.ParseError
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Disabled
+import measure.MISSING_ARROW
+import measure.MISSING_SEMICOLON
 import org.junit.jupiter.api.Test
 import parsers.AnalyzerType
 import parsers.IRecoveryAnalyzer
@@ -13,16 +12,8 @@ class TestAntlr8ErrorCollector : IErrorCollectorTest {
 
     @Test
     fun testJAva8ErrorCollector() {
-        collectJavaError(missingSemicolon, ParseError.SEMICOLON_EXPECTED)
-        collectJavaError(missingArrow, ParseError.ARROW_EXPECTED)
-    }
-
-    @Test
-    fun testBadRecovery() {
-        // find more than one expected
-        collectJavaError(missingOpenBracket, ParseError.MORE_THAT_ONE_EXPECTED)
-        //15 different tokens expected!
-        collectJavaError(notAStatement, ParseError.MORE_THAT_ONE_EXPECTED)
+        collectJavaError(missingSemicolon, MISSING_SEMICOLON)
+        collectJavaError(missingArrow, MISSING_ARROW)
     }
 
     @Test

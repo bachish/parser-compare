@@ -1,8 +1,7 @@
-import measure.ParseError
-import org.junit.jupiter.api.Disabled
+import measure.MISSING_SEMICOLON
+import measure.UNKNOWN_ERROR
 import org.junit.jupiter.api.Test
 import parsers.AnalyzerType
-import parsers.IRecoveryAnalyzer
 import parsers.ParserFactory
 import kotlin.test.assertEquals
 
@@ -12,15 +11,15 @@ class TestTreeSitterErrorCollector : IErrorCollectorTest{
 
     @Test
     fun testJava8ErrorCollector() {
-        collectJavaError(missingSemicolon, ParseError.SEMICOLON_EXPECTED)
+        collectJavaError(missingSemicolon, MISSING_SEMICOLON)
     }
 
 
     @Test
     fun testBadDetection() {
-        collectJavaError(identifierExpected, ParseError.UNKNOWN)
-        collectJavaError(missingOpenBracket, ParseError.UNKNOWN)
-        collectJavaError(missingArrow, ParseError.UNKNOWN)
+        collectJavaError(identifierExpected, UNKNOWN_ERROR)
+        collectJavaError(missingOpenBracket, UNKNOWN_ERROR)
+        collectJavaError(missingArrow, UNKNOWN_ERROR)
     }
 
     @Test

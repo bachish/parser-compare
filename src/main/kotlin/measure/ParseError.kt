@@ -1,25 +1,13 @@
 package measure
-import kotlinx.serialization.Serializable
 
-@Serializable
-enum class ParseError {
-    NOT_A_STATEMENT,
-    SEMICOLON_EXPECTED,
-    OPEN_BRACKET_EXPECTED,
-    ARROW_EXPECTED,
-    UNKNOWN,
-    MORE_THAT_ONE_EXPECTED,
-    IDENTIFIER_EXPECTED
-}
+enum class ParseErrorType { ADDED_TOKEN, REMOVED_TOKEN, CHANGED_TOKEN, UNKNOWN }
 
-fun String.parseErrorMessages(): Set<ParseError> = lineSequence()
-    .filter { it.isNotEmpty() }
-    .map {
-        when (it) {
-            "not a statement" -> ParseError.NOT_A_STATEMENT
-            "';' expected" -> ParseError.SEMICOLON_EXPECTED
-            "'(' expected" -> ParseError.OPEN_BRACKET_EXPECTED
-            "-> expected" -> ParseError.ARROW_EXPECTED
-            else -> ParseError.UNKNOWN
-        }
-    }.toSet()
+data class ParseError(
+    val type: ParseErrorType,
+    val affectedToken: String,
+)
+
+val UNKNOWN_ERROR = ParseError(ParseErrorType.UNKNOWN, "")
+val MISSING_SEMICOLON = ParseError(ParseErrorType.REMOVED_TOKEN, ";")
+val MISSING_ARROW = ParseError(ParseErrorType.REMOVED_TOKEN, "->")
+val MISSING_OPEN_BRACKET = ParseError(ParseErrorType.REMOVED_TOKEN, "{")
