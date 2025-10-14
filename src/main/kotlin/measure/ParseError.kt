@@ -1,7 +1,10 @@
 package measure
 
+import kotlinx.serialization.Serializable
+
 enum class ParseErrorType { ADDED_TOKEN, REMOVED_TOKEN, CHANGED_TOKEN, UNKNOWN }
 
+@Serializable
 data class ParseError(
     val type: ParseErrorType,
     val affectedToken: String,
