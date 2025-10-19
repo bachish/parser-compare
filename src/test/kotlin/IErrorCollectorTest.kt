@@ -11,6 +11,11 @@ interface IErrorCollectorTest {
         assertEquals(1, errors.size)
         assertEquals(error, errors[0].type)
     }
+    fun findCascadeErrors(code: String) {
+        var parser = getParser()
+        val errors = parser.getErrors(code)
+        assert(errors.size > 1)
+    }
 
     fun assertNoError(code: String) {
         var parser = getParser()

@@ -7,12 +7,7 @@ import com.sun.source.util.JavacTask
 import com.sun.source.util.TreeScanner
 import com.sun.tools.javac.api.ClientCodeWrapper
 import com.sun.tools.javac.api.JavacTool
-import com.sun.tools.javac.parser.Scanner
-import com.sun.tools.javac.parser.ScannerFactory
-import com.sun.tools.javac.parser.Tokens
-import com.sun.tools.javac.util.Context
-import com.sun.tools.javac.util.Log
-import com.sun.tools.javac.util.Options
+import com.sun.tools.javac.tree.JCTree
 import measure.ErrorInfo
 import measure.ParseError
 import measure.ParseErrorType
@@ -25,7 +20,6 @@ import parsers.IRecoveryAnalyzer
 import java.io.File
 import java.io.StringWriter
 import java.net.URI
-import java.nio.charset.StandardCharsets
 import javax.tools.*
 import kotlin.system.measureNanoTime
 
@@ -78,23 +72,38 @@ class JavacAnalyzer : IRecoveryAnalyzer<String, Tree> {
         if (diagnostic.kind != Diagnostic.Kind.ERROR) {
             return null
         }
-        return when (diagnostic) {
+        val errorInfo = when (diagnostic) {
             is ClientCodeWrapper.DiagnosticSourceUnwrapper -> {
                 when (diagnostic.d.code) {
                     "compiler.err.expected" -> {
                         val args = diagnostic.d.args
                         if (args.size != 1) {
-                            return ErrorInfo(UNKNOWN_ERROR)
+                            ErrorInfo(UNKNOWN_ERROR)
                         }
-                        val arg = args[0].toString().replace("'", "")
-                        ErrorInfo(ParseError(ParseErrorType.REMOVED_TOKEN, arg))
+                        else {
+                            val arg = args[0].toString().removeSurrounding("'")
+                            ErrorInfo(ParseError(ParseErrorType.REMOVED_TOKEN, arg))
+                        }
                     }
+
+                    "compiler.err.expected2" -> {
+                        ErrorInfo(ParseError(ParseErrorType.REMOVED_TOKEN, "VARIANT_NUMBER_IS_2"))
+                    }
+
+                    "compiler.err.premature.eof" -> ErrorInfo(
+                        ParseError(ParseErrorType.UNEXPECTED_EOF, "eof"), diagnostic.toString()
+                    )
+
                     else -> ErrorInfo(UNKNOWN_ERROR)
                 }
             }
 
             else -> ErrorInfo(UNKNOWN_ERROR)
         }
+        errorInfo.line = diagnostic.lineNumber
+        errorInfo.col = diagnostic.columnNumber
+        errorInfo.msg = diagnostic.toString()
+        return errorInfo
     }
 
     override fun measureParse(file: File): Long {
@@ -184,7 +193,26 @@ class JavacAnalyzer : IRecoveryAnalyzer<String, Tree> {
             if (node == null) {
                 return null
             }
-            graph.addVertex(node)
+            if(!graph.addVertex(node)) {
+                //in  cases whith ellpsis, first params with same type and error before it
+                // javac use same nodes for different nodes (ellipsis presents as two arguments
+                // and both use same Indend and Modifier childs).
+                //see example for code
+                /**
+                public interface C { {
+                void foo(String s, String... b);
+                **/
+                if(node is JCTree) {
+                    var duplicateNode = node.clone()
+                    graph.addVertex(duplicateNode as Tree?)
+                    if (parent != null) {
+                        graph.addVertex(parent)
+                        graph.addEdge(parent, duplicateNode)
+                    }
+                    return null
+                }
+
+            }
             if (parent != null) {
                 graph.addVertex(parent)
                 graph.addEdge(parent, node)

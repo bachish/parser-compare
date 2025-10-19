@@ -3,9 +3,7 @@ package parsers.treesitter
 import jflex.JavaScanner
 import jflex.JavaToken
 import jflex.TreeSitterLexer
-import measure.ErrorInfo
-import measure.MISSING_SEMICOLON
-import measure.UNKNOWN_ERROR
+import measure.*
 import org.jgrapht.Graph
 import org.jgrapht.graph.DefaultEdge
 import org.jgrapht.graph.SimpleGraph
@@ -49,14 +47,26 @@ class TreeSitterAnalyzer : IRecoveryAnalyzer<Int, TSNode> {
     }
 
     private fun getErrorInfo(errorNode: TSNode): ErrorInfo {
-        if (errorNode.isMissing) {
-            val error = when (errorNode.type) {
-                ";" -> MISSING_SEMICOLON
-                else -> throw IllegalStateException("new missing node type!")
+        val errorType = when {
+            errorNode.isMissing ->  {
+                    ParseError(ParseErrorType.REMOVED_TOKEN, errorNode.type)
             }
-            return ErrorInfo(error)
+            errorNode.isExtra -> {
+                if(errorNode.type == "ERROR") {
+                    UNKNOWN_ERROR
+                }
+                else {
+                    ParseError(ParseErrorType.ADDED_TOKEN, errorNode.type)
+                }
+            }
+            else -> {
+                throw IllegalStateException("new error node type '${errorNode.type}'!")
+            }
         }
-        return ErrorInfo(UNKNOWN_ERROR)
+       // TODO set error column and line if possible
+        //errorInfo.line = errorNode.javaClass.getDeclaredField("context1")
+        //errorInfo.col = errorNode.javaClass.getDeclaredField("context2")
+        return  ErrorInfo(errorType, errorNode.toString())
 
     }
 

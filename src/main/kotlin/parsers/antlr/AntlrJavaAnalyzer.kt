@@ -29,9 +29,9 @@ class AntlrJavaAnalyzer : AntlrAnalyzer<JavaParser>() {
     }
 
     class JavaErrorListener : CollectedErrorListener() {
-        override fun getSemi(): Int = JavaLexer.SEMI
-        override fun getLBrace(): Int = JavaLexer.LBRACE
-        override fun getArrow(): Int = JavaLexer.ARROW
+        override fun getTokenView(code: Int) : String {
+            return JavaLexer.VOCABULARY.getLiteralName(code).removeSurrounding("'")
+        }
     }
 }
 

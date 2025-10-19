@@ -29,9 +29,9 @@ class AntlrJava8Analyzer : AntlrAnalyzer<Java8Parser>() {
     override fun getErrorListener(): CollectedErrorListener = Java8ErrorListener()
 
     class Java8ErrorListener : CollectedErrorListener() {
-        override fun getSemi(): Int = Java8Lexer.SEMI
-        override fun getLBrace(): Int = Java8Lexer.LBRACE
-        override fun getArrow(): Int = Java8Lexer.ARROW
+        override fun getTokenView(code: Int) : String {
+            return Java8Lexer.VOCABULARY.getDisplayName(code).removeSurrounding("'")
+        }
     }
 
 }
